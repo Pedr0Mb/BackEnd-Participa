@@ -4,3 +4,9 @@
 
 - Sitema de Denuncia
 - Sistema de atualizações de status autmotica
+
+###############
+   ATUALIZAR
+###############
+
+Trocar o Banco de Dados de SQL para FIREBASE
