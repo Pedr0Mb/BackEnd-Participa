@@ -1,0 +1,311 @@
+@host = http://localhost:3000
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwiY2FyZ28iOiJBZG1pbmlzdHJhZG9yIiwiaWF0IjoxNzUzNTgyNTQ3LCJleHAiOjE3NTM1ODYxNDd9.PLuEEn4E9ja2YoLm7bVv-raGmNuQa4rQJt7K0NkMl1A
+
+# Usuario
+
+### 1. Criar usuário
+
+POST {{host}}/usuario
+Content-Type: application/json
+
+{
+"nome": "Pedro Molina",
+"email": "joao@example.com",
+"senha": "senha123",
+"cpf": "12345678901",
+"telefone": "13981911591"
+}
+
+### 2. Fazer login (recebe token)
+
+POST {{host}}/usuario/login
+Content-Type: application/json
+
+{
+"cpf": "12345678601",
+"senha": "senha123"
+}
+
+### 3. Ver meu usuário
+
+GET {{host}}/usuario
+Authorization: Bearer {{token}}
+
+### 4. Ver meu Histórico
+
+GET {{host}}/usuario/historico/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+ "dataInicio": "2025-5-25",
+ "tipoAtividade": "Pauta"
+}
+
+### 5. Pesquisar usuário
+
+GET {{host}}/administrador/pesquisarUsuario?nome=Pedro&cpf=12345678901&cargo=Cidadao
+Authorization: Bearer {{token}}
+
+### 6. Visualizar usuário
+
+GET {{host}}/administrador/visualizarUsuario/1
+Authorization: Bearer {{token}}
+
+### 7. Promover usuário
+
+PATCH {{host}}/administrador/promoverUsuario/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+"cpf": "12345678601",
+"cargo": "Gerenciador",
+"secretaria": "Educação",
+"permissao": ["Publicar Noticia", "Moderar Conteudo"]
+}
+
+### 8. Ver Historico
+
+GET {{host}}/administrador/verHistorico/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "id": 2,
+ "dataInicio": "2025-5-25",
+ "tipoAtividade": "Pauta"
+}
+
+# Noticia
+
+### 9. Pesquisar notícias
+
+GET {{host}}/noticias/pesquisarNoticia?titulo=Evento&tema=Educação&status=Ativo
+
+### 10. Visualizar notícia
+
+GET {{host}}/noticias/visualizarNoticia/1
+
+### 11. Criar notícia
+
+POST {{host}}/noticias
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+"titulo": "Evento",
+"tema": "Educação",
+"dataLimite": "2025-10-25",
+"breveDescritivo": "Um evento sobre educação",
+"link": "http://evento.com",
+"imagem": "http://evento.com/imagem.jpg"
+}
+
+### 12. Alterar notícia
+
+PATCH {{host}}/noticias
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+"id": 1,
+"titulo": "Evento",
+"tema": "Educação",
+"status": "Ativo",
+"dataLimite": "2025-10-25",
+"breveDescritivo": "Um evento sobre educação",
+"link": "http://evento.com",
+"imagem": "http://evento.com/imagem.jpg"
+}
+
+### 13. Deletar notícia (body)
+
+DELETE {{host}}/noticias/1
+Authorization: Bearer {{token}}
+
+# Transmissão
+
+### 14. Pesquisar transmissão
+
+GET {{host}}/transmissao/pesquisarTransmissao?titulo=Live&status=Agendada
+Authorization: Bearer {{token}}
+
+### 15. Visualizar transmissão
+
+GET {{host}}/transmissao/visualizarTransmissao/1
+Authorization: Bearer {{token}}
+
+### 16. Criar transmissão
+
+POST {{host}}/transmissao
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+"titulo": "Live Sessão",
+"tema": "Educação",
+"dataInicio": "2025-10-29",
+"breveDescritivo": "Live sobre a sobre as reformas dos hospitais!",
+"link": "http://live.com/sessao",
+"imagem": "http://transmissao.com/imagem.jpg"
+}
+
+### 17. Alterar transmissão
+
+PATCH {{host}}/transmissao
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+"id": 1,
+"titulo": "Live Sessão",
+"tema": "Segurança",
+"dataInicio": "2025-10-29",
+"breveDescritivo": "Live sobre a sobre as reformas nas avenidas!",
+"link": "http://live.com/sessao2",
+"imagem": "http://transmissao2.com/imagem.jpg"
+}
+
+### 18. Deletar transmissão (body)
+
+DELETE {{host}}/transmissao/1
+Authorization: Bearer {{token}}
+
+# Pauta
+
+### 19. Pesquisar pauta
+
+GET {{host}}/pauta/pesquisarPauta?titulo=Debate&status=Ativo
+Authorization: Bearer {{token}}
+
+### 20. Visualizar pauta
+
+GET {{host}}/pauta/visualizarPauta/1
+Authorization: Bearer {{token}}
+
+### 21. Criar pauta
+
+POST {{host}}/pauta
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+"titulo": "Debate sobre o Orçamento Público",
+"descricao": "Discussão do orçamento",
+"justificativa": "Importante para a cidade",
+"dataLimite": "2025-10-29",
+"imagem": "http://imagem.com/img.jpg"
+}
+
+### 22. Alterar pauta
+
+PATCH {{host}}/pauta
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+"id": 1,
+"titulo": "Novo Debate sobre o Orçamento Público",
+"descricao": "Discussão do orçamento",
+"justificativa": "Importante para a cidade",
+"dataLimite": "2025-11-29",
+"imagem": "http://imagem.com/img.jpg"
+}
+
+### 23. Deletar pauta (body)
+
+DELETE {{host}}/pauta/1
+Authorization: Bearer {{token}}
+
+#comentario
+
+### 24. Criar comentário
+
+POST {{host}}/comentario
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+"texto": "Muito legal a pauta!",
+"idPauta": 1
+}
+
+### 25. Alterar comentário
+
+PATCH {{host}}/comentario
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+"id": 3,
+"texto": "Ponto atualizado"
+}
+
+### 26. Deletar comentário (body)
+
+DELETE {{host}}/comentario/1
+Authorization: Bearer {{token}}
+
+#votação
+
+### 27. Pesquisar votações
+
+GET {{host}}/votacao/pesquisarVotacao?titulo=Votação&statusVotacao=Agendada&tema=Educação
+Authorization: Bearer {{token}}
+
+### 28. Visualizar votação
+
+GET {{host}}/votacao/visualizarVotacao/1
+Authorization: Bearer {{token}}
+
+### 29. Criar votação
+
+POST {{host}}/votacao
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+"titulo": "Votação sobre a Etec",
+"tema": "Educação"
+"breveDescritivo": "Descrição da votação",
+"publicoAlvo": "Estudantes e seus responsaveis",
+"orcamento": "Falar sobre a votacao",
+"dataFim": "2025-07-25T18:00:00",
+"imagem": "http://imagem.com/imagem.jpg"
+"opcoesResposta": [
+    "Concordo",
+    "Discordo",
+    "Talvez Concordo"
+],
+}
+
+### 30. Alterar votação
+
+PATCH {{host}}/votacao
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+"id": 1,
+"titulo": "Nova Votação sobre a Etec",
+"tema": "Educação"
+"breveDescritivo": "Descrição da votação",
+"publicoAlvo": "Estudantes e seus responsaveis",
+"orcamento": "Falar sobre a votacao",
+"dataFim": "2025-07-25T18:00:00",
+"status": "Encerrada"
+"imagem": "http://imagem.com/imagem.jpg"
+"resultado": "Opção Concordo ganhou!".
+"opcoesResposta": [
+    "Concordo",
+    "Discordo",
+    "Talvez Concordo"
+]
+}
+
+### 31. Deletar votação (body)
+
+DELETE {{host}}/votacao/1
+Authorization: Bearer {{token}}
+
