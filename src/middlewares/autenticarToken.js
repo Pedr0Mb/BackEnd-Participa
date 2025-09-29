@@ -1,18 +1,18 @@
-import jwt from 'jsonwebtoken';
-import dotenv from 'dotenv';
-dotenv.config();
+import admin from "firebase-admin";
 
-const JWT_SECRET = process.env.JWT_SECRET;
+export async function autenticarToken(req, res, next) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) return res.sendStatus(401);
 
-export function autenticarToken(req, res, next) {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
+  const token = authHeader.split(" ")[1];
 
-  if (!token) return res.sendStatus(401); 
+  try {
+    const decoded = await admin.auth().verifyIdToken(token);
 
-  jwt.verify(token, JWT_SECRET, (err, usuario) => {
-    if (err) return res.sendStatus(403); 
-    req.usuario = usuario; 
+    req.usuario = { id: decoded.uid,}
+
     next();
-  });
+  } catch (err) {
+    return res.sendStatus(403);
+  }
 }

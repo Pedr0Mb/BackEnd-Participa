@@ -1,13 +1,19 @@
-import { db } from '../plugins/bd.js'
+import { db,admin } from '../plugins/bd.js'
 
-export async function registrarAtividade(idAtividade = null, tipo, titulo = null, link = null, idUsuario) {
+const registroAtividadeRef = db.collection('RegistroAtividade')
+
+export async function registrarAtividade({idAtividade = null, tipo, acao, descricao , idUsuario, titulo = null, payload = null}) {
     try {
-        await db.query(
-            `INSERT INTO RegistroAtividade 
-            (tipo_atividade, titulo_atividade, link_atividade, date_atividade, id_usuario, id_atividade)
-            VALUES (?, ?, ?, NOW(), ?, ?, ?)`,
-            [tipo, titulo, link, idUsuario, idAtividade]
-        );
+        await registroAtividadeRef.add({
+            idAtividade,
+            acao,
+            idUsuario,
+            tipo,
+            titulo,
+            payload,
+            descricao,
+            dataAtividade: admin.firestore.FieldValue.serverTimestamp()
+        })
     } catch (error) {
         console.error('Erro ao registrar atividade:', error);
     }
