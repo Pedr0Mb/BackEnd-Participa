@@ -3,35 +3,12 @@ import * as debateController from './debateController.js'
 import { autenticarToken } from '../../middlewares/autenticarToken.js';
 
 const  router = express.Router();
+router.use(autenticarToken);
 
-router.get(
-    '/', 
-    autenticarToken,
-    debateController.pesquisarDebateController
-)
-
-router.get(
-    '/:id', 
-    autenticarToken,
-    debateController.visualizarDebateController
-)
-
-router.post(
-    '/', 
-    autenticarToken, 
-    debateController.criarDebateController
-)
-
-router.put(
-    '/:id', 
-    autenticarToken, 
-    debateController.editarDebateController
-)
-
-router.delete(
-    '/:id', 
-    autenticarToken, 
-    debateController.removerDebateController
-)
+router.get('/', debateController.pesquisarDebateController)
+router.get('/:id', debateController.visualizarDebateController)
+router.post('/',  debateController.criarDebateController)
+router.put('/:id',  debateController.editarDebateController)
+router.delete('/:id',  debateController.removerDebateController)
 
 export default router;

@@ -34,7 +34,6 @@ export async function editarUsuarioController(req, res, next) {
       id: Number(req.body.id),
       nome: req.body.nome,
       email: req.body.email,
-      role: req.body.role,
       ativo: req.body.ativo
     })  
 

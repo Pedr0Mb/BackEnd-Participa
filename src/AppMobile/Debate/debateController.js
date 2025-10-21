@@ -3,8 +3,8 @@ import * as debateValidator from './debateValidator.js'
 
 export async function pesquisarDebateController(req, res, next) {  
   try {
-    const data = debateValidator.SchemaPesquisarPauta.parse( {
-      idUsuario: Number(req.query.idUsuario) || null,
+    const data = debateValidator.SchemaPesquisarPauta.parse({
+      idUsuario: req.query.idUsuario ? Number(req.query.idUsuario) : null,
       titulo: req.query.titulo || null,
     });
 
@@ -18,8 +18,8 @@ export async function pesquisarDebateController(req, res, next) {
 export async function visualizarDebateController(req, res, next) {
   try {
     const { idDebate } = debateValidator.SchemaPautaId.parse({ idDebate: Number(req.params.id) });
-    const resultado = await debateService.visualizarPauta(idDebate);
-    return res.status(200).json(resultado);
+    const pauta = await debateService.visualizarPauta(idDebate);
+    return res.status(200).json(pauta);
   } catch (err) {
     next(err);
   }
@@ -29,7 +29,7 @@ export async function criarDebateController(req, res, next) {
   try {
     const data = debateValidator.SchemaCriarPauta.parse({
       titulo: req.body.titulo,
-      subTitulo: req.body.subTitulo,
+      subtitulo: req.body.subtitulo,
       tema: req.body.tema,
       descricoes: req.body.descricoes,
       imagem: req.body.imagem
@@ -44,16 +44,16 @@ export async function criarDebateController(req, res, next) {
 
 export async function editarDebateController(req, res, next) {
   try {
-    const parseData = debateValidator.SchemaEditarPauta.parse({
+    const data = debateValidator.SchemaEditarPauta.parse({
       idDebate: Number(req.params.id),
-      subTitulo: req.body.subTitulo,
       titulo: req.body.titulo,
+      subtitulo: req.body.subtitulo,
       tema: req.body.tema,
       descricoes: req.body.descricoes,
       imagem: req.body.imagem 
     });
 
-    await debateService.editarPauta({ idUsuario: req.usuario.id, ...parseData });
+    await debateService.editarPauta({ idUsuario: req.usuario.id, ...data });
     return res.sendStatus(204);
   } catch(err) {
     next(err);
@@ -63,9 +63,9 @@ export async function editarDebateController(req, res, next) {
 export async function removerDebateController(req, res, next) {
   try {
     const idUsuario = req.usuario.id;
-    const parseData = debateValidator.SchemaPautaId.parse({idDebate: Number(req.params.idDebate)});
-    await debateService.deletarPauta({ idUsuario, ...parseData });
-    return res.status(204);
+    const { idDebate } = debateValidator.SchemaPautaId.parse({ idDebate: Number(req.params.id) });
+    await debateService.deletarPauta({ idUsuario, idDebate });
+    return res.sendStatus(204);
   } catch(err) {
     next(err);
   }

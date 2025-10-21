@@ -5,22 +5,20 @@ import {
   descricoesSchema,
   linkSchema,
   temaSchema,
-  statusSchema,
 } from '../../utils/commonValidator.js';
 
-export const SchemaPautaId = z.object({
+export const SchemaDebateId = z.object({
   idDebate: idSchema,
 });
 
-export const SchemaPesquisarPauta = z.object({
+export const SchemaPesquisarDebate = z.object({
   titulo: textoSchema.nullable().optional(),
-  status: statusSchema.nullable().optional(),
 });
 
-export const SchemaEditarPauta = z.object({
+export const SchemaEditarDebate = z.object({
   idDebate: idSchema,
   titulo: textoSchema,
-  subTitulo: textoSchema,
+  subtitulo: textoSchema,
   descricoes: descricoesSchema,
   imagem: linkSchema,
   tema: temaSchema,

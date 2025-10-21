@@ -21,7 +21,7 @@ export const SchemaPesquisarPauta = z.object({
 // ======================== CRIAR ========================
 export const SchemaCriarPauta = z.object({
   titulo: textoSchema,
-  subTitulo: textoSchema.nullable().optional(),
+  subtitulo: textoSchema.nullable().optional(),
   descricoes: descricoesSchema,
   imagem: linkSchema.nullable().optional(),
   tema: temaSchema.nullable().optional(),
@@ -31,7 +31,7 @@ export const SchemaCriarPauta = z.object({
 export const SchemaEditarPauta = z.object({
   idDebate: idSchema,
    titulo: textoSchema.nullable().optional(),
-  subTitulo: textoSchema.nullable().optional(),
+  subtitulo: textoSchema.nullable().optional(),
   descricoes: descricoesSchema.nullable().optional(),
   imagem: linkSchema.nullable().optional(),
   tema: temaSchema.nullable().optional(),

@@ -1,12 +1,10 @@
-import { atualizarDescricoes } from '../../utils/atualizarDescricoes.js'
-import { db, admin } from '../../plugins/bd.js'
-import { registrarAtividade } from '../../utils/registroAtividade.js'
-import { obterDadosUsuario } from '../../utils/obterDadosUsuario.js'
-import { getNextId } from '../../utils/getNextId.js'
+import { atualizarDescricoes } from '../../utils/atualizarDescricoes.js';
+import { db, admin } from '../../plugins/bd.js';
+import { registrarAtividade } from '../../utils/registroAtividade.js';
 
-const debateRef = db.collection('Debate')
-const comentarioRef = db.collection('Comentario')
-const descricaoRef = db.collection('Descricao')
+const debateRef = db.collection('Debate');
+const comentarioRef = db.collection('Comentario');
+const descricaoRef = db.collection('Descricao');
 
 function formatarData(timestamp) {
   return timestamp ? timestamp.toDate().toLocaleString('pt-BR') : null;
@@ -14,7 +12,7 @@ function formatarData(timestamp) {
 
 export async function pesquisarDebate(data) {
   let query = debateRef
-    .select('titulo', 'subTitulo', 'idAutor', 'imagem', 'criadoEm','fotoUrlAutor','nomeAutor','qtComentario')
+    .select('titulo', 'subtitulo', 'idAutor', 'imagem', 'criadoEm','fotoUrlAutor','nomeAutor','qtComentario')
     .orderBy('criadoEm', 'desc');
 
   if (data.titulo) query = query.where('titulo', '==', data.titulo);
@@ -33,7 +31,7 @@ export async function pesquisarDebate(data) {
   });
 }
 
-export async function visualizardebate(idDebate) {
+export async function visualizarDebate(idDebate) {
   const debateDoc = await debateRef.doc(String(idDebate)).get();
   if (!debateDoc.exists)
     throw Object.assign(new Error('Debate não encontrado'), { status: 404 });
@@ -63,61 +61,25 @@ export async function visualizardebate(idDebate) {
         atualizadoEm: formatarData(c.atualizadoEm),
       };
     }),
-
-   descricoes: descricaoQuery.docs.map(doc => {
-     const data = doc.data();
+    descricoes: descricaoQuery.docs.map(doc => {
+      const d = doc.data();
       return {
-      id: doc.id,
-    ...data,
-    criadoEm: formatarData(data.criadoEm),
-  };
-}),
+        id: doc.id,
+        ...d,
+        criadoEm: formatarData(d.criadoEm),
+      };
+    }),
   };
 }
 
-export async function criarDebate(data) {
-  const idDebate = await getNextId('Debate');
-  const { nome, fotoUrl } = await obterDadosUsuario(data.idAutor);
-
-  await debateRef.doc(String(idDebate)).set({
-    idDebate,
-    idAutor: data.idAutor,
-    nomeAutor: nome,
-    fotoUrlAutor: fotoUrl,
-    titulo: data.titulo,
-    subTitulo: data.subTitulo,
-    imagem: data.imagem,
-    criadoEm: admin.firestore.FieldValue.serverTimestamp(),
-    atualizadoEm: null,
-    qtComentario: 0,
-  });
-
-  await atualizarDescricoes({
-    descricoes: data.descricao,
-    tipoAtividade: 'Debate',
-    idItem: idDebate,
-  });
-
-  await registrarAtividade({
-    tipo: 'Debate',
-    titulo: data.titulo,
-    descricao: `Você criou uma nova Debate`,
-    acao: 'Debate criada',
-    idUsuario: data.idAutor,
-    idAtividade: String(idDebate),
-  });
-}
-
-export async function editardebate(data) {
+export async function editarDebate(data) {
   const debateDoc = await debateRef.doc(String(data.idDebate)).get();
-
   if (!debateDoc.exists)
     throw Object.assign(new Error('Debate não encontrado'), { status: 404 });
 
-
   await debateRef.doc(String(data.idDebate)).update({
     titulo: data.titulo,
-    subTitulo: data.subTitulo,
+    subtitulo: data.subtitulo,
     imagem: data.imagem,
     atualizadoEm: admin.firestore.FieldValue.serverTimestamp(),
   });
@@ -127,33 +89,33 @@ export async function editardebate(data) {
     tipoAtividade: 'Debate',
     idItem: String(data.idDebate),
   });
-  
+
   await registrarAtividade({
     tipo: 'Debate',
     titulo: data.titulo,
-    descricao: `Você editou a Debate`,
-    acao: 'Debate editada',
+    descricao: 'Você editou o Debate',
+    acao: 'Debate editado',
     idUsuario: data.idUsuario,
     idAtividade: String(data.idDebate),
   });
 }
 
-export async function deletardebate(data) {
-  const debateDoc = await debateRef.doc(String(data.idDebate)).get()
+export async function deletarDebate(data) {
+  const debateDoc = await debateRef.doc(String(data.idDebate)).get();
   if (!debateDoc.exists) 
-    throw Object.assign(new Error('Debate não encontrada'), { status: 404 })
+    throw Object.assign(new Error('Debate não encontrado'), { status: 404 });
 
-  const debateData = debateDoc.data()
+  const debateData = debateDoc.data();
 
-  await debateRef.doc(String(data.idDebate)).delete()
-  await atualizarDescricoes([],'debate',String(data.idDebate))
+  await debateRef.doc(String(data.idDebate)).delete();
+  await atualizarDescricoes({ descricoes: [], tipoAtividade: 'Debate', idItem: String(data.idDebate) });
 
   await registrarAtividade({
     tipo: 'Debate',
     titulo: debateData.titulo,
-    descricao: `Você excluiu a Debate`,
-    acao: 'Debate excluida',
+    descricao: 'Você excluiu o Debate',
+    acao: 'Debate excluído',
     idUsuario: data.idUsuario,
     idAtividade: String(data.idDebate),
-  })
+  });
 }

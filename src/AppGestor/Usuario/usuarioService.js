@@ -8,35 +8,51 @@ function formatarData(timestamp) {
 }
 
 export async function pesquisarUsuario(data) {
-  const { nome, role, cpf } = data
+  const { nome, role, cpf } = data;
 
-  let query = userRef.select('id','nome','email','role','cpf')
+  // Campos principais para listagem
+  let query = userRef.select('nome', 'email', 'role', 'cpf');
+
+  // Filtros opcionais
   if (nome) query = query.where('nome', '==', nome)
-  if (role) query = query.where('role', '==', role)
-  if (cpf) query = query.where('cpf', '==', cpf)
+  if (role) query = query.where('role', '==', role);
+  if (cpf) query = query.where('cpf', '==', cpf);
 
-  const userQuery = await query.get()
-  if (userQuery.empty) return []
+  const userQuery = await query.get();
 
-  return userQuery.docs.map(doc => ({ id: Number(doc.id), ...doc.data() }))
+  if (userQuery.empty) return { data: [] };
+
+  const usuarios = userQuery.docs.map(doc => ({
+    id: Number(doc.id),
+    ...doc.data(),
+  }));
+
+  return { data: usuarios };
 }
+
 
 export async function visualizarUsuario(idUsuario) {
   const userDoc = await userRef.doc(String(idUsuario)).get();
-  
-  if (!userDoc.exists) 
-    throw Object.assign(new Error('Usuario não encontrado'), { status: 404 });
+
+  if (!userDoc.exists) {
+    throw Object.assign(new Error('Usuário não encontrado'), { status: 404 });
+  }
 
   const data = userDoc.data();
 
-  if (data.dataCriacao) data.dataCriacao = formatarData(data.dataCriacao);
-  if (data.atualizadoEm) data.atualizadoEm = formatarData(data.atualizadoEm);
+  const formatar = (campo) =>
+    campo ? formatarData(campo) : null;
 
-  return {  
+  const usuario = {
     id: Number(userDoc.id),
-    ...data
+    ...data,
+    dataCriacao: formatar(data.dataCriacao),
+    atualizadoEm: formatar(data.atualizadoEm),
   };
+
+  return { data: usuario };
 }
+
 
 export async function editarUsuario(data) {
   const usuarioDoc = await userRef.doc(String(data.id)).get();
@@ -64,31 +80,30 @@ export async function editarUsuario(data) {
 
 export async function verHistorico(idUsuario) {
   const usuarioDoc = await userRef.doc(String(idUsuario)).get();
+  if (!usuarioDoc.exists) {
+    throw Object.assign(new Error('Usuário não encontrado'), { status: 404 });
+  }
 
-  if (!usuarioDoc.exists)  
-    throw Object.assign(new Error('Usuario não encontrado'), { status: 404 });
-
-  let query = atividadeRef
+  const querySnapshot = await atividadeRef
     .where('idUsuario', '==', String(idUsuario))
-    .orderBy('dataAtividade', 'desc');
+    .orderBy('dataAtividade', 'desc')
+    .get();
 
-  const historicoQuery = await query.get();
-
-  const historico = historicoQuery.docs.map(doc => {
+  const historico = querySnapshot.docs.map(doc => {
     const data = doc.data();
-    if (data.dataAtividade) {
-      data.dataAtividade = formatarData(data.dataAtividade);
-    }
+
+    // Apenas ajusta id e dataAtividade
     return {
       id: Number(doc.id),
-      ...data
+      ...data,
+      idAtividade: data.idAtividade ? Number(data.idAtividade) : null,
+      dataAtividade: data.dataAtividade ? formatarData(data.dataAtividade) : null,
     };
   });
 
-  return {
-    data: historico
-  };
+  return { data: historico };
 }
+
 
 export async function promoverUsuario(idUsuario) {
   const usuarioDoc = await userRef.doc(String(idUsuario)).get()
@@ -96,7 +111,7 @@ export async function promoverUsuario(idUsuario) {
   if(!usuarioDoc.exists)
     throw Object.assign(new Error('Usuario não encontrado'), { status: 404 });
     await userRef.doc(String(idUsuario)).update({
-      role: 'Gestor',
+      role: 'gestor',
       atualizadoEm: admin.firestore.FieldValue.serverTimestamp()
     })
 

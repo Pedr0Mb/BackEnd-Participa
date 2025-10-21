@@ -11,7 +11,7 @@ function formatarData(timestamp) {
 }
 
 export async function pesquisarDenuncia(data) {
-  let query = denunciaRef.select('alvoId', 'tipo', 'motivo', 'idReportante')
+  let query = denunciaRef.select('alvoId', 'tipo', 'motivo', 'idReportante', 'status')
 
   if (data.tipo) query = query.where('tipo', '==', data.tipo)
   if (data.status) query = query.where('status', '==', data.status)
@@ -23,87 +23,88 @@ export async function pesquisarDenuncia(data) {
 }
 
 export async function visualizarDenuncia(idDenuncia) {
-  const denunciaDoc = await denunciaRef.doc(String(idDenuncia)).get();
+  const denunciaDoc = await denunciaRef.doc(String(idDenuncia)).get()
 
   if (!denunciaDoc.exists) 
-    throw Object.assign(new Error('Denuncia não encontrada'), { status: 404 });
+    throw Object.assign(new Error('Denuncia não encontrada'), { status: 404 })
   
-  const data = denunciaDoc.data();
+  const data = denunciaDoc.data()
 
   return {
     id: denunciaDoc.id,
     ...data,
     criadoEm: formatarData(data.criadoEm),
     atualizadoEm: formatarData(data.atualizadoEm),
-  };
+  }
 }
 
-export async function removerDenuncia(idDenuncia) {
+export async function removerDenuncia(idDenuncia, idUsuario) {
   const denunciaDocRef = denunciaRef.doc(String(idDenuncia))
   const denunciaSnap = await denunciaDocRef.get()
 
   if (!denunciaSnap.exists) 
-    throw Object.assign(new Error('Denuncia não encontrada'), { status: 404 });
+    throw Object.assign(new Error('Denuncia não encontrada'), { status: 404 })
 
   const data = denunciaSnap.data()
 
-  if (data.status != 'aberta') 
-    throw Object.assign(new Error('Denuncia não pde ser removida'), { status: 403 });
+  if (data.status !== 'aberta') 
+    throw Object.assign(new Error('Denuncia não pode ser removida'), { status: 403 })
 
   await denunciaDocRef.update({ status: 'removida' })
 
- await registrarAtividade({
+  await registrarAtividade({
     tipo: 'Denuncia',
     titulo: null,
     descricao: `Denuncia ${idDenuncia} removida`,
     acao: 'Denuncia removida',
     payload: null,
-    idUsuario: data.idReportante,
+    idUsuario, // quem executou a ação
     idAtividade: idDenuncia,
   })
 }
 
-export async function verificarDenuncia(idDenuncia) {
-  const denunciaDocRef = denunciaRef.doc(String(idDenuncia));
-  const denunciaSnap = await denunciaDocRef.get();
+export async function verificarDenuncia(idDenuncia, idUsuario) {
+  const denunciaDocRef = denunciaRef.doc(String(idDenuncia))
+  const denunciaSnap = await denunciaDocRef.get()
 
   if (!denunciaSnap.exists) 
-    throw Object.assign(new Error('Denuncia não encontrada'), { status: 404 });
+    throw Object.assign(new Error('Denuncia não encontrada'), { status: 404 })
 
-  const denunciaData = denunciaSnap.data();
+  const denunciaData = denunciaSnap.data()
 
-  if (data.status != 'aberta') 
-    throw Object.assign(new Error('Denuncia não pode ser verificada'), { status: 403 });
+  if (denunciaData.status !== 'aberta') 
+    throw Object.assign(new Error('Denuncia não pode ser verificada'), { status: 403 })
 
-  const alvoId = denunciaData.alvoId;
-  await denunciaDocRef.update({ status: 'verificada'});
+  const alvoId = denunciaData.alvoId
+  await denunciaDocRef.update({ status: 'verificada' })
 
-  let idUsuarioDenunciado = null;
+  let idUsuarioDenunciado = null
 
   if (denunciaData.tipo === 'Comentario') {
-    const comentarioDoc = await comentarioRef.doc(String(alvoId)).get();
-    const comentarioData = comentarioDoc.data();
-    idUsuarioDenunciado = comentarioData.idUsuario;
-    await comentarioRef.doc(String(alvoId)).delete();
+    const comentarioDoc = await comentarioRef.doc(String(alvoId)).get()
+    const comentarioData = comentarioDoc.data()
+    idUsuarioDenunciado = comentarioData.idUsuario
+    await comentarioRef.doc(String(alvoId)).delete()
   } 
 
-   if (denunciaData.tipo === 'Debate') {
-    const pautaDoc = await pautaRef.doc(String(alvoId)).get();
-    const pautaData = pautaDoc.data();
-    idUsuarioDenunciado = pautaData.idAutor;
-    await pautaRef.doc(String(alvoId)).delete();
+  if (denunciaData.tipo === 'Debate') {
+    const pautaDoc = await pautaRef.doc(String(alvoId)).get()
+    const pautaData = pautaDoc.data()
+    idUsuarioDenunciado = pautaData.idAutor
+    await pautaRef.doc(String(alvoId)).delete()
   } 
 
-  await usuarioRef.doc(String(idUsuarioDenunciado)).update({ ativo: false });
+  if (idUsuarioDenunciado) {
+    await usuarioRef.doc(String(idUsuarioDenunciado)).update({ ativo: false })
+  }
 
   await registrarAtividade({
     tipo: 'Denuncia',
     titulo: null,
     descricao: `Denuncia ${idDenuncia} verificada`,
-    acao: 'Denuncia',
+    acao: 'Denuncia verificada',
     payload: null,
-    idUsuario: denunciaData.idReportante,
+    idUsuario, // quem executou a ação
     idAtividade: idDenuncia,
   })
 }
-

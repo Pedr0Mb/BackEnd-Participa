@@ -8,42 +8,42 @@ const router = express.Router();
 router.get(
   '/',
   autenticarToken,
-  verificarPermissao(['Administrador']),
+  verificarPermissao(['administrador']),
   administradorController.pesquisarUsuarioController
 );
 
 router.get(
   '/:id',
   autenticarToken,
-  verificarPermissao(['Administrador']),
+  verificarPermissao(['administrador']),
   administradorController.visualizarUsuarioController
 );
 
 router.put(
   '/:id',
   autenticarToken,
-  verificarPermissao(['Administrador']),
+  verificarPermissao(['administrador']),
   administradorController.editarUsuarioController
 );
 
 router.get(
   '/:id/historico',
   autenticarToken,
-  verificarPermissao(['Administrador']),
+  verificarPermissao(['administrador']),
   administradorController.verHistoricoController
 );
 
 router.patch(
   '/:id/promover',
   autenticarToken,
-  verificarPermissao(['Administrador']),
+  verificarPermissao(['administrador']),
   administradorController.promoverUser
 )
 
 router.patch(
   '/:id/desativar',
   autenticarToken,
-  verificarPermissao(['Administrador']),
+  verificarPermissao(['administrador']),
   administradorController.promoverUser
 )
 

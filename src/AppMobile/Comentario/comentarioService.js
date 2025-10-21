@@ -13,7 +13,7 @@ export async function criarComentario(data) {
 
   if (data.parentComentario) {
     const parentDoc = await comentarioRef.doc(String(data.parentComentario)).get();
-    if (!parentDoc.exists || parentDoc.data().isDeleted) 
+    if (!parentDoc.exists) 
       throw Object.assign(new Error('Comentário pai não encontrado'), { status: 404 });
 
     if (parentDoc.data().idDebate !== data.idDebate) 
@@ -55,7 +55,7 @@ export async function deletarComentario(data) {
   const usuarioDoc = await usuarioRef.doc(String(data.idUsuario)).get();
   const usuario = usuarioDoc.data();
 
-  if (comentarioDoc.data().idUsuario !== data.idUsuario && usuario.cargo === 'Cidadão') 
+  if (comentarioDoc.data().idUsuario !== data.idUsuario && usuario.role === 'cidadao') 
     throw Object.assign(new Error('Voçê não tem permissão para remover esse debate'), { status: 403 });
 
   await comentarioRef.doc(String(data.idComentario)).delete();
@@ -83,7 +83,7 @@ export async function editarComentario(data) {
   const usuarioDoc = await usuarioRef.doc(String(data.idUsuario)).get()
   const usuario = usuarioDoc.data()
 
-  if (comentarioDoc.data().idUsuario !== data.idUsuario && usuario.cargo === 'Cidadão') 
+  if (comentarioDoc.data().idUsuario !== data.idUsuario && usuario.role === 'cidadao') 
     throw Object.assign(new Error('Voçê não tem permissão para remover esse comentario'), { status: 403 });
 
   await comentarioRef.doc(String(data.idComentario)).update({

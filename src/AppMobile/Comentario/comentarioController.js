@@ -39,7 +39,7 @@ export async function deletarComentarioController(req, res, next) {
     const idUsuario = req.usuario.id
 
     const data = comentarioValidator.SchemaDeletarComentario.parse({
-      idComentario: Number(req.params.idComentario)
+      idComentario: Number(req.params.id)
     })
 
     await comentarioService.deletarComentario({ idUsuario, ...data })

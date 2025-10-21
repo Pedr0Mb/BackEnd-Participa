@@ -8,9 +8,11 @@ function formatarData(timestamp) {
   return timestamp ? timestamp.toDate().toLocaleString('pt-BR') : null;
 }
 
+// ================= Pesquisar transmissões =================
 export async function pesquisarTransmissao(filters) {
-  let query = transmissaoRef
-    .select('idTransmissao', 'titulo', 'imagem', 'foto', 'tema', 'criadoEm','publicadoEm')
+  let query = transmissaoRef.select(
+    'idTransmissao', 'titulo', 'imagem', 'foto', 'tema', 'criadoEm', 'publicadoEm', 'status'
+  );
 
   if (filters.titulo) query = query.where('titulo', '==', filters.titulo);
   if (filters.status) query = query.where('status', '==', filters.status);
@@ -24,11 +26,12 @@ export async function pesquisarTransmissao(filters) {
       idTransmissao: Number(doc.id),
       ...data,
       criadoEm: formatarData(data.criadoEm),
-      publicadoEm: formatarData(data.publicadoEm)
+      publicadoEm: formatarData(data.publicadoEm),
     };
   });
 }
 
+// ================= Visualizar transmissão =================
 export async function visualizarTransmissao(idTransmissao) {
   const docSnap = await transmissaoRef.doc(String(idTransmissao)).get();
 
@@ -44,6 +47,7 @@ export async function visualizarTransmissao(idTransmissao) {
   };
 }
 
+// ================= Criar transmissão =================
 export async function criarTransmissao(data) {
   const idTransmissao = await getNextId('Transmissao');
 
@@ -55,11 +59,12 @@ export async function criarTransmissao(data) {
     tempo: data.tempo,
     descricao: data.descricao,
     linkExterno: data.linkExterno,
-    imagem: data.imagem, 
-    foto: data.foto,     
+    imagem: data.imagem,
+    foto: data.foto,
     criadoPor: data.idUsuario,
     publicadoEm: null,
     status: 'rascunho',
+    ativo: true,
     criadoEm: admin.firestore.FieldValue.serverTimestamp(),
   });
 
@@ -73,16 +78,16 @@ export async function criarTransmissao(data) {
   });
 }
 
+// ================= Editar transmissão =================
 export async function editarTransmissao(data) {
-  console.log(data)
   const docSnap = await transmissaoRef.doc(String(data.idTransmissao)).get();
 
   if (!docSnap.exists) 
     throw Object.assign(new Error('Transmissão não encontrada'), { status: 404 });
 
-  if (docSnap.data().status == 'publicado') 
-    throw Object.assign(new Error('Transmissão não pode ser editada'), { status: 404 });
-
+  const docData = docSnap.data();
+  if (docData.status === 'publicado') 
+    throw Object.assign(new Error('Transmissão não pode ser editada'), { status: 400 });
 
   await transmissaoRef.doc(String(data.idTransmissao)).update({
     titulo: data.titulo,
@@ -93,7 +98,7 @@ export async function editarTransmissao(data) {
     descricao: data.descricao,
     linkExterno: data.linkExterno,
     imagem: data.imagem,
-    foto: data.foto,      
+    foto: data.foto,
   });
 
   await registrarAtividade({
@@ -106,10 +111,11 @@ export async function editarTransmissao(data) {
   });
 }
 
+// ================= Publicar transmissão =================
 export async function publicarTransmissao(data) {
   const docSnap = await transmissaoRef.doc(String(data.idTransmissao)).get();
 
-  if (!docSnap.exists || !docSnap.data().ativo) 
+  if (!docSnap.exists) 
     throw Object.assign(new Error('Transmissão não encontrada'), { status: 404 });
 
   await transmissaoRef.doc(String(data.idTransmissao)).update({
@@ -124,9 +130,10 @@ export async function publicarTransmissao(data) {
     acao: 'Transmissão publicada',
     idUsuario: data.idUsuario,
     idAtividade: data.idTransmissao,
-  })
+  });
 }
 
+// ================= Deletar transmissão =================
 export async function deletarTransmissao(data) {
   const docSnap = await transmissaoRef.doc(String(data.idTransmissao)).get();
 

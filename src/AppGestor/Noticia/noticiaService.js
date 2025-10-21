@@ -8,46 +8,45 @@ function formatarData(timestamp) {
   return timestamp ? timestamp.toDate().toLocaleString('pt-BR') : null;
 }
 
+// ======================== Pesquisar notícias ========================
 export async function pesquisarNoticia(filters) {
   let query = noticiaRef
-  .select('titulo', 'tema', 'imagem', 'fonte', 'resumo', 'linkExterno', 'criadoEm','publicadoEm','status')
+    .select('titulo', 'tema', 'imagem', 'fonte', 'resumo', 'linkExterno', 'criadoEm', 'publicadoEm', 'status');
 
   if (filters.titulo) query = query.where('titulo', '==', filters.titulo);
   if (filters.status) query = query.where('status', '==', filters.status);
 
   const resultado = await query.get();
 
-  if (resultado.empty)
-    return { success: true, message: 'Nenhuma notícia encontrada', data: [] };
+  if (resultado.empty) return { success: true, message: 'Nenhuma notícia encontrada', data: [] };
 
-  return {
-    data: resultado.docs.map(doc => {
+  return resultado.docs.map(doc => {
       const data = doc.data();
       return {
-        idNoticia: Number(doc.id),
+        id: Number(doc.id),
         ...data,
         criadoEm: formatarData(data.criadoEm),
-        publicadoEm: formatarData(data.publicadoEm)
+        publicadoEm: formatarData(data.publicadoEm),
       };
-    }),
-  };
+    });
 }
 
+// ======================== Visualizar notícia ========================
 export async function visualizarNoticia(idNoticia) {
   const noticiaDoc = await noticiaRef.doc(String(idNoticia)).get();
 
-  if (!noticiaDoc.exists) 
-    throw Object.assign(new Error('Noticia não encontrada'), { status: 404 });
+  if (!noticiaDoc.exists) throw Object.assign(new Error('Notícia não encontrada'), { status: 404 });
 
   const data = noticiaDoc.data();
   return {
-      idNoticia: Number(noticiaDoc.id),
-      ...data,
-      criadoEm: formatarData(data.criadoEm),
-      publicadoEm: formatarData(data.publicadoEm),
+    id: Number(noticiaDoc.id),
+    ...data,
+    criadoEm: formatarData(data.criadoEm),
+    publicadoEm: formatarData(data.publicadoEm),
   };
 }
 
+// ======================== Criar notícia ========================
 export async function criarNoticia(data) {
   const idNumerico = await getNextId('Noticia');
 
@@ -74,14 +73,12 @@ export async function criarNoticia(data) {
   });
 }
 
+// ======================== Editar notícia ========================
 export async function editarNoticia(data) {
   const noticiaDoc = await noticiaRef.doc(String(data.idNoticia)).get();
 
-  if (!noticiaDoc.exists) 
-    throw Object.assign(new Error('Noticia não encontrada'), { status: 404 });
-
-  if (noticiaDoc.data().status == 'publicado') 
-    throw Object.assign(new Error('Noticia publicada não pode ser editada'), { status: 409 });
+  if (!noticiaDoc.exists) throw Object.assign(new Error('Notícia não encontrada'), { status: 404 });
+  if (noticiaDoc.data().status === 'publicado') throw Object.assign(new Error('Notícia publicada não pode ser editada'), { status: 409 });
 
   await noticiaRef.doc(String(data.idNoticia)).update({
     titulo: data.titulo,
@@ -89,7 +86,7 @@ export async function editarNoticia(data) {
     fonte: data.fonte,
     resumo: data.resumo,
     linkExterno: data.linkExterno,
-    imagem: data.imagem
+    imagem: data.imagem,
   });
 
   await registrarAtividade({
@@ -102,11 +99,11 @@ export async function editarNoticia(data) {
   });
 }
 
+// ======================== Publicar notícia ========================
 export async function publicarNoticia(data) {
   const noticiaDoc = await noticiaRef.doc(String(data.idNoticia)).get();
 
-  if (!noticiaDoc.exists) 
-    throw Object.assign(new Error('Noticia não encontrada'), { status: 404 });
+  if (!noticiaDoc.exists) throw Object.assign(new Error('Notícia não encontrada'), { status: 404 });
 
   await noticiaRef.doc(String(data.idNoticia)).update({
     status: 'publicado',
@@ -123,11 +120,11 @@ export async function publicarNoticia(data) {
   });
 }
 
+// ======================== Deletar notícia ========================
 export async function deletarNoticia(data) {
   const noticiaDoc = await noticiaRef.doc(String(data.idNoticia)).get();
 
-  if (!noticiaDoc.exists) 
-    throw Object.assign(new Error('Noticia não encontrada'), { status: 404 });
+  if (!noticiaDoc.exists) throw Object.assign(new Error('Notícia não encontrada'), { status: 404 });
 
   await noticiaRef.doc(String(data.idNoticia)).delete();
 

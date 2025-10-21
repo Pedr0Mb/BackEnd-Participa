@@ -10,7 +10,7 @@ export const categoriasEnum = z.enum([
   errorMap: () => ({ message: 'Categoria inválida selecionada.' })
 })
 
-export const cargoEnum = z.enum(['Administrador', 'Gestor', 'Cidadão'], {
+export const cargoEnum = z.enum(['administrador', 'gestor', 'cidadao'], {
   errorMap: () => ({ message: 'Cargo inválido.' })
 })
 
@@ -37,8 +37,8 @@ export const preferenciaNotificacaoEnum = z.enum(['Som', 'Vibração'], {
 export const tipoAtividadeEnum = z.enum(['Debate', 'Comentario', 'Pauta', 'Denuncia', 'Gestão', 'Usuário'])
 export const tipoAtividadeDenunciaEnum = z.enum(['Debate', 'Comentario'])
 
-export const statusEnum = z.enum(['rascunho', 'publicado', 'removido'])
-export const statusVotacaoEnum = z.enum(['rascunho', 'aberta', 'encerrada'])
+export const statusEnum = z.enum(['rascunho', 'publicado'])
+export const statusVotacaoEnum = z.enum(['rascunho', 'ativa', 'finalizada'])  
 export const statusDenunciaEnum = z.enum(['aberta', 'removida', 'verificada'])
 
 // ===================== ID =====================
@@ -49,8 +49,8 @@ export const idSchema = z.number().int().positive({
 
 // ===================== Usuário - Info Básicas =====================
 
-export const senhaSchema = z.string().min(6, {
-  message: 'A senha deve ter no mínimo 6 caracteres.'
+export const senhaSchema = z.string().min(3, {
+  message: 'A senha deve ter no mínimo 3 caracteres.'
 })
 
 export const emailSchema = z.string().email({
@@ -64,7 +64,7 @@ export const providerSchema = z.string().max(50, {
 })
 
 export const cpfSchema = z.string().regex(/^\d{11}$/, {
-  message: 'CPF deve conter exatamente 11 dígitos numéricos.'
+  message: 'CPF deve conter 11 dígitos numéricos.'
 })
 
 // ===================== Usuário - Admin =====================

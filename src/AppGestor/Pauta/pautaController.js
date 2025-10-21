@@ -1,15 +1,19 @@
-import * as votacaoService from './pautaService.js';
-import * as validacaoVotacao from './pautaValidator.js';
+import * as pautaService from './pautaService.js';
+import * as pautaValidator from './pautaValidator.js';
+
+function parseDate(dateStr) {
+  return dateStr ? new Date(dateStr) : null;
+}
 
 export async function pesquisarPautaController(req, res, next) {
   try {
-    const filters = validacaoVotacao.SchemaPesquisarPauta.parse({
+    const filters = pautaValidator.SchemaPesquisarPauta.parse({
       status: req.query.status || null,
       titulo: req.query.titulo || null,
-    })
+    });
 
-    const resultado = await votacaoService.pesquisarPauta(filters);
-    res.status(200).json(resultado);
+    const pautas = await pautaService.pesquisarPauta(filters);
+    return res.status(200).json(pautas);
   } catch (err) {
     next(err);
   }
@@ -17,12 +21,12 @@ export async function pesquisarPautaController(req, res, next) {
 
 export async function visualizarPautaController(req, res, next) {
   try {
-    const { idPauta } = validacaoVotacao.SchemaPautaID.parse({
+    const { idPauta } = pautaValidator.SchemaPautaID.parse({
       idPauta: Number(req.params.id),
-    })
+    });
 
-    const resultado = await votacaoService.visualizarPauta(idPauta);
-    res.status(200).json(resultado);
+    const pauta = await pautaService.visualizarPauta(idPauta);
+    return res.status(200).json(pauta);
   } catch (err) {
     next(err);
   }
@@ -30,17 +34,17 @@ export async function visualizarPautaController(req, res, next) {
 
 export async function criarPautaController(req, res, next) {
   try {
-    const data = validacaoVotacao.SchemaCriarPauta.parse({
+    const data = pautaValidator.SchemaCriarPauta.parse({
       titulo: req.body.titulo,
       descricoes: req.body.descricoes,
       opcoes: req.body.opcoes,
       imagem: req.body.imagem,
       inicioVotacao: parseDate(req.body.inicioVotacao),
       fimVotacao: parseDate(req.body.fimVotacao),
-      tag: req.body.tag,
+      tema: req.body.tema,
     });
 
-    await votacaoService.criarPauta({idCriador: req.usuario.id,...data,});
+    await pautaService.criarPauta({ idCriador: req.usuario.id, ...data });
     return res.sendStatus(201);
   } catch (err) {
     next(err);
@@ -49,18 +53,18 @@ export async function criarPautaController(req, res, next) {
 
 export async function editarPautaController(req, res, next) {
   try {
-   const data = validacaoVotacao.SchemaEditarPauta.parse({
-    id: req.params.id,               
-    titulo: req.body.titulo,
-    descricao: req.body.descricao,   
-    opcoes: req.body.opcoes,         
-    imagem: req.body.imagem,
-    inicioVotacao: parseDate(req.body.inicioVotacao),
-    fimVotacao: parseDate(req.body.fimVotacao),
-    tag: req.body.tag,
-});
+    const data = pautaValidator.SchemaEditarPauta.parse({
+      id: Number(req.params.id),
+      titulo: req.body.titulo,
+      descricao: req.body.descricao,
+      opcoes: req.body.opcoes,
+      imagem: req.body.imagem,
+      inicioVotacao: parseDate(req.body.inicioVotacao),
+      fimVotacao: parseDate(req.body.fimVotacao),
+      tema: req.body.tema,
+    });
 
-    await votacaoService.editarPauta({ idCriador: req.usuario.id,...data,});
+    await pautaService.editarPauta({ idCriador: req.usuario.id, ...data });
     return res.sendStatus(204);
   } catch (err) {
     next(err);
@@ -69,8 +73,11 @@ export async function editarPautaController(req, res, next) {
 
 export async function publicarPautaController(req, res, next) {
   try {
-    const { idPauta } = validacaoVotacao.SchemaPautaID.parse({idPauta: Number(req.params.idPauta),});
-    await votacaoService.publicarPauta({idCriador: req.usuario.id,idPauta,})
+    const { idPauta } = pautaValidator.SchemaPautaID.parse({
+      idPauta: Number(req.params.id),
+    });
+
+    await pautaService.publicarPauta({ idCriador: req.usuario.id, idPauta });
     return res.sendStatus(204);
   } catch (err) {
     next(err);
@@ -79,8 +86,11 @@ export async function publicarPautaController(req, res, next) {
 
 export async function deletarPautaController(req, res, next) {
   try {
-    const { idPauta } = validacaoVotacao.SchemaPautaID.parse({idPauta: Number(req.params.idPauta),});
-    await votacaoService.deletarPauta({idCriador: req.usuario.id, idPauta,});
+    const { idPauta } = pautaValidator.SchemaPautaID.parse({
+      idPauta: Number(req.params.id),
+    });
+
+    await pautaService.deletarPauta({ idCriador: req.usuario.id, idPauta });
     return res.sendStatus(204);
   } catch (err) {
     next(err);
