@@ -5,7 +5,6 @@ const descricoesRef = db.collection('Descricao')
 
 export async function atualizarDescricoes({ descricoes = [], tipoAtividade, idItem }) {
 
-  console.log(descricoes,tipoAtividade,idItem)
   const antigasSnapshot = await descricoesRef
     .where('tipoAtividade', '==', tipoAtividade)
     .where('idItem', '==', idItem)

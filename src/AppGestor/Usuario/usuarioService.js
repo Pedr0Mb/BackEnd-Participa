@@ -1,3 +1,4 @@
+import { object } from 'zod';
 import { admin, db } from '../../plugins/bd.js'
 import { registrarAtividade } from '../../utils/registroAtividade.js'
 
@@ -22,43 +23,37 @@ export async function pesquisarUsuario(data) {
 
   if (userQuery.empty) return { data: [] };
 
-  const usuarios = userQuery.docs.map(doc => ({
+  return userQuery.docs.map(doc => ({
     id: Number(doc.id),
     ...doc.data(),
   }));
-
-  return { data: usuarios };
 }
 
 
 export async function visualizarUsuario(idUsuario) {
   const userDoc = await userRef.doc(String(idUsuario)).get();
 
-  if (!userDoc.exists) {
-    throw Object.assign(new Error('Usuário não encontrado'), { status: 404 });
-  }
+  if (!userDoc.exists) throw Object.assign(new Error('Usuário não encontrado'), { status: 404 });
 
   const data = userDoc.data();
 
-  const formatar = (campo) =>
-    campo ? formatarData(campo) : null;
-
-  const usuario = {
+  return {
     id: Number(userDoc.id),
     ...data,
-    dataCriacao: formatar(data.dataCriacao),
-    atualizadoEm: formatar(data.atualizadoEm),
+    dataCriacao: formatarData(data.dataCriacao),
+    atualizadoEm: formatarData(data.atualizadoEm),
   };
-
-  return { data: usuario };
 }
 
 
 export async function editarUsuario(data) {
   const usuarioDoc = await userRef.doc(String(data.id)).get();
 
-  if (!usuarioDoc.exists)  
-    throw Object.assign(new Error('Usuario não encontrado'), { status: 404 });
+  if (!usuarioDoc.exists) throw Object.assign(new Error('Usuario não encontrado'), { status: 404 });
+
+  if(data.id.toString() === usuarioDoc.id.toString()){
+    throw Object.assign(new Error('Administrador não pode editar a si mesmo'), { status: 400 });
+  }
 
   await userRef.doc(String(data.id)).update({
     nome: data.nome,
@@ -92,7 +87,6 @@ export async function verHistorico(idUsuario) {
   const historico = querySnapshot.docs.map(doc => {
     const data = doc.data();
 
-    // Apenas ajusta id e dataAtividade
     return {
       id: Number(doc.id),
       ...data,
@@ -105,15 +99,29 @@ export async function verHistorico(idUsuario) {
 }
 
 
-export async function promoverUsuario(idUsuario) {
-  const usuarioDoc = await userRef.doc(String(idUsuario)).get()
+export async function promoverUsuario(data) {
+  const usuarioDoc = await userRef.doc(String(data.idUsuario)).get()
 
-  if(!usuarioDoc.exists)
-    throw Object.assign(new Error('Usuario não encontrado'), { status: 404 });
-    await userRef.doc(String(idUsuario)).update({
-      role: 'gestor',
-      atualizadoEm: admin.firestore.FieldValue.serverTimestamp()
-    })
+  if (!usuarioDoc.exists) {
+    throw Object.assign(new Error('Usuario não encontrado'), { status: 404 })
+  };
+
+  if(usuarioDoc.id === data.idAdm.toString()){
+    throw Object.assign(new Error('Administrador não pode promover a si mesmo'), { status: 400 });
+  }
+  if(usuarioDoc.data().ativo !== true) {
+    throw Object.assign(new Error('Usuário não pode ser gerenciado pois esta inativo'), {status: 400})
+  }
+
+  if(usuarioDoc.data().role !== 'cidadao'){
+    throw Object.assign(new Error('Usuário não pode ser promovido a gestor'), { status: 400 });
+  }
+
+
+  await userRef.doc(String(data.idUsuario)).update({
+    role: 'gestor',
+    atualizadoEm: admin.firestore.FieldValue.serverTimestamp()
+  })
 
   await registrarAtividade({
     tipo: 'Gestão',
@@ -125,22 +133,105 @@ export async function promoverUsuario(idUsuario) {
   });
 }
 
-export async function desativarUser(idUsuario) {
-  const usuarioDoc = await userRef.doc(String(idUsuario)).get()
+export async function rebaixarUsuario(data) {
+  const usuarioDoc = await userRef.doc(String(data.idUsuario)).get()
 
-  if(!usuarioDoc.exists)
-    throw Object.assign(new Error('Usuario não encontrado'), { status: 404 });
+  if (!usuarioDoc.exists) {
+    throw Object.assign(new Error('Usuario não encontrado'), { status: 404 })
+  };
 
-    await userRef.doc(String(idUsuario)).update({
-      ativo: false,
-      atualizadoEm: admin.firestore.FieldValue.serverTimestamp()
-    })
+  if(usuarioDoc.id === data.idAdm.toString()){
+    throw Object.assign(new Error('Administrador não pode rebaixar a si mesmo'), { status: 400 });
+  }
+
+  if(usuarioDoc.data().ativo !== true) {
+    throw Object.assign(new Error('Usuário não pode ser gerenciado pois esta inativo'), {status: 400})
+  }
+
+  if(usuarioDoc.data().role !== 'gestor'){
+    throw Object.assign(new Error('Usuário não pode ser rebaixado de gestor para cidadão'), { status: 400 });
+  }
+
+
+
+  await userRef.doc(String(data.idUsuario)).update({
+    role: 'cidadao',
+    atualizadoEm: admin.firestore.FieldValue.serverTimestamp()
+  })
 
   await registrarAtividade({
     tipo: 'Gestão',
     titulo: data.titulo,
-    descricao: 'Você promoveu um usuario',
-    acao: 'Usuario promovido',
+    descricao: 'Você rebaixou um usuario',
+    acao: 'Usuario rebaixado',
+    idUsuario: data.idUsuario,
+    idAtividade: usuarioDoc.id,
+  });
+}
+
+export async function desativarUser(data) {
+  const usuarioDoc = await userRef.doc(String(data.idUsuario)).get()
+
+  if (!usuarioDoc.exists) {
+    throw Object.assign(new Error('Usuario não encontrado'), { status: 404 })
+  };
+
+  if(usuarioDoc.id === data.idAdm.toString()){
+    throw Object.assign(new Error('Administrador não pode desativar a si mesmo'), { status: 400 });
+  }
+  
+  if(usuarioDoc.data().ativo !== true) {
+    throw Object.assign(new Error('Usuário não pode ser inativado pois esta inativo'), {status: 400})
+  }
+
+  if(usuarioDoc.data().role === 'administrador'){
+    throw Object.assign(new Error('Administrador não pode ser desativado'), { status: 400 });
+  }
+
+  await userRef.doc(String(data.idUsuario)).update({
+    ativo: false,
+    atualizadoEm: admin.firestore.FieldValue.serverTimestamp()
+  })
+
+  await registrarAtividade({
+    tipo: 'Gestão',
+    titulo: data.titulo,
+    descricao: 'Você desativou um usuario',
+    acao: 'Usuario desativado',
+    idUsuario: data.idUsuario,
+    idAtividade: usuarioDoc.id,
+  });
+}
+
+export async function ativarUser(data) {
+  const usuarioDoc = await userRef.doc(String(data.idUsuario)).get()
+
+  if (!usuarioDoc.exists) {
+    throw Object.assign(new Error('Usuario não encontrado'), { status: 404 })
+  };
+
+  if(usuarioDoc.id === data.idAdm.toString()){
+    throw Object.assign(new Error('Administrador não pode ativar a si mesmo'), { status: 400 });
+  }
+
+  if(usuarioDoc.data().role === 'administrador'){
+    throw Object.assign(new Error('Administrador não pode ser ativado'), { status: 400 });
+  }
+
+  if(usuarioDoc.data().ativo !== false) {
+    throw Object.assign(new Error('Usuário já ativo'), {status: 400})
+  }
+
+  await userRef.doc(String(data.idUsuario)).update({
+    ativo: true,
+    atualizadoEm: admin.firestore.FieldValue.serverTimestamp()
+  })
+
+  await registrarAtividade({
+    tipo: 'Gestão',
+    titulo: data.titulo,
+    descricao: 'Você ativou um usuario',
+    acao: 'Usuario ativado',
     idUsuario: data.idUsuario,
     idAtividade: usuarioDoc.id,
   });

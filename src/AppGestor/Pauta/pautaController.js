@@ -56,7 +56,7 @@ export async function editarPautaController(req, res, next) {
     const data = pautaValidator.SchemaEditarPauta.parse({
       id: Number(req.params.id),
       titulo: req.body.titulo,
-      descricao: req.body.descricao,
+      descricoes: req.body.descricoes,
       opcoes: req.body.opcoes,
       imagem: req.body.imagem,
       inicioVotacao: parseDate(req.body.inicioVotacao),

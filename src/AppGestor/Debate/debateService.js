@@ -43,7 +43,7 @@ export async function visualizarDebate(idDebate) {
     .get();
 
   const descricaoQuery = await descricaoRef
-    .where('tipo', '==', 'Debate')
+    .where('tipoAtividade', '==', 'Debate')
     .where('idItem', '==', idDebate)
     .get();
 

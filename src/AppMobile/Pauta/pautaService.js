@@ -1,4 +1,4 @@
-import { db } from '../../plugins/bd.js'
+import { db, admin } from '../../plugins/bd.js'
 import { registrarAtividade } from '../../utils/registroAtividade.js'
 import { getNextId } from '../../utils/getNextId.js'
 
@@ -12,9 +12,9 @@ const votoRef = db.collection('Voto')
 
 export async function pesquisarPauta(data) {
   let query = pautaRef.select('titulo','status','inicioVotacao','fimVotacao','imagem','foto','tema')
+  .where('status','==','aberta')
 
   if(data.titulo) query = query.where('titulo','==',data.titulo)
-  if(data.status) query = query.where('status','==',data.status)
 
   const resultado = await query.orderBy('inicioVotacao','asc').get()
   if(resultado.empty) return []
@@ -45,7 +45,7 @@ export async function visualizarPauta(idPauta) {
   }
   
   const descricoesSnapshot = await descricaoRef
-  .where('tipo', '==', 'Pauta')
+  .where('tipoAtividade', '==', 'Pauta')
   .where('idItem', '==', Number(idPauta))
   .get();
   
@@ -95,7 +95,7 @@ export async function registrarVoto(data) {
     throw Object.assign(new Error('Você já votou nesta pauta'), { status: 400 });
 
   const novasOpcoes = votacao.opcoes.map(opcao =>
-    opcao.id === data.idOpcaoResposta
+    opcao.id === data.idOpcao
       ? { ...opcao, qtVotos: opcao.qtVotos + 1 }
       : opcao
   );
@@ -107,10 +107,9 @@ export async function registrarVoto(data) {
   const novoIdVoto = await getNextId('Voto');
 
   await votoRef.doc(String(novoIdVoto)).set({
-    id: novoIdVoto,
     idUsuario: data.idUsuario,
     idPauta: data.idPauta,
-    idOpcaoResposta: data.idOpcaoResposta,
+    idOpcaoResposta: data.idOpcao,
     dataRegistro: admin.firestore.FieldValue.serverTimestamp()
   });
 
@@ -118,7 +117,7 @@ export async function registrarVoto(data) {
     tipo: 'Voto',
     descricao: 'Você registrou seu voto',
     acao: 'Voto registrado',
-    payload: `Opção votada id: ${data.idOpcaoResposta}`,
+    payload: `Opção votada id: ${data.idOpcao}`,
     idUsuario: data.idUsuario,
     idAtividade: novoIdVoto
   });

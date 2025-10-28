@@ -15,7 +15,7 @@ export const SchemaPautaId = z.object({
 // ======================== PESQUISAR ========================
 export const SchemaPesquisarPauta = z.object({
   titulo: textoSchema.nullable().optional(),
-  idUsuario: idSchema.nullable().optional(),
+  debateProprio: z.boolean(),
 });
 
 // ======================== CRIAR ========================

@@ -2,7 +2,7 @@ import {z} from 'zod'
 import {idSchema, tipoAtividadeDenunciaSchema, statusDenunciaScchema} from '../../utils/commonValidator.js'
 
 export const SchemaPesquisarDenuncia = z.object({
-    tipoAtividade: tipoAtividadeDenunciaSchema
+    tipo: tipoAtividadeDenunciaSchema
     .nullable()
     .optional(),
     status: statusDenunciaScchema

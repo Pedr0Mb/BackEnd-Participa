@@ -10,8 +10,10 @@ router.get('/',administradorController.pesquisarUsuarioController);
 router.get('/:id',administradorController.visualizarUsuarioController);
 router.put('/:id',administradorController.editarUsuarioController);
 router.get('/:id/historico',administradorController.verHistoricoController);
-router.patch('/:id/promover',administradorController.promoverUser)
-router.patch('/:id/desativar',administradorController.promoverUser)
+router.patch('/:id/promover',administradorController.promoverUserController)
+router.patch('/:id/rebaixar',administradorController.rebaixarUserController)
+router.patch('/:id/desativar',administradorController.desativarUserController)
+router.patch('/:id/ativar',administradorController.ativarUserController)
 
 export default router;
     

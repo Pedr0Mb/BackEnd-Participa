@@ -14,7 +14,7 @@ export async function pesquisarTransmissaoController(req, res, next) {
 
 export async function visualizarTransmissaoController(req, res, next) {
   try {
-    const { idTransmissao } = validacaoTransmissao.SchemaTransmissaoID.parse({ idTransmissao: Number(req.params.idTransmissao) })
+    const { idTransmissao } = validacaoTransmissao.SchemaTransmissaoID.parse({ idTransmissao: Number(req.params.id) })
     const resultado = await transmissaoService.visualizarTransmissao(idTransmissao)
 
     return res.status(200).json(resultado)

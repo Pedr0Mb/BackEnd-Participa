@@ -1,7 +1,6 @@
   import { db, admin } from '../../plugins/bd.js'
   import { getNextId } from '../../utils/getNextId.js'
   import { registrarAtividade } from '../../utils/registroAtividade.js'
-  import { OAuth2Client } from 'google-auth-library';
   import bcrypt from 'bcrypt';
   import dotenv from 'dotenv'; 
   dotenv.config();
@@ -43,7 +42,7 @@
       tipoNotificacao: [],
       preferenciaNotificacao: [],
       opcoesCategoria: [],
-      dataCriacao: admin.firestore.FieldValue.serverTimestamp(),
+      dataAlteracao: null,
     })
   }
 
@@ -61,9 +60,17 @@
   }
 
   export async function verPreferencias(idUsuario) {
-    const snapshot = await preferenciaRef.where('idUsuario', '==', idUsuario).get()
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-  }
+  const snapshot = await preferenciaRef.where('idUsuario', '==', idUsuario).get();
+  const preferencias = snapshot.docs.map(
+    doc => ({ 
+      id: doc.id, 
+      ...doc.data(), 
+      dataAlteracao: formatarData(doc.data().dataAlteracao) 
+    }))[0];
+    
+  return preferencias;
+}
+
 
   export async function verHistorico(data) {
     const historicoRef = db.collection('RegistroAtividade')

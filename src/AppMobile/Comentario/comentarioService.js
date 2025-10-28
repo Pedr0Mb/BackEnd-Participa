@@ -52,10 +52,7 @@ export async function deletarComentario(data) {
   if (!comentarioDoc.exists) 
     throw Object.assign(new Error('Comentário não encontrado'), { status: 400 });
 
-  const usuarioDoc = await usuarioRef.doc(String(data.idUsuario)).get();
-  const usuario = usuarioDoc.data();
-
-  if (comentarioDoc.data().idUsuario !== data.idUsuario && usuario.role === 'cidadao') 
+  if (comentarioDoc.data().idUsuario !== data.idUsuario) 
     throw Object.assign(new Error('Voçê não tem permissão para remover esse debate'), { status: 403 });
 
   await comentarioRef.doc(String(data.idComentario)).delete();
@@ -80,10 +77,7 @@ export async function editarComentario(data) {
   if (!comentarioDoc.exists) 
     throw Object.assign(new Error('Comentário não encontrado'), { status: 404 });
 
-  const usuarioDoc = await usuarioRef.doc(String(data.idUsuario)).get()
-  const usuario = usuarioDoc.data()
-
-  if (comentarioDoc.data().idUsuario !== data.idUsuario && usuario.role === 'cidadao') 
+  if (comentarioDoc.data().idUsuario !== data.idUsuario) 
     throw Object.assign(new Error('Voçê não tem permissão para remover esse comentario'), { status: 403 });
 
   await comentarioRef.doc(String(data.idComentario)).update({

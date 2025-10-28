@@ -35,7 +35,7 @@ export async function pesquisarTransmissao(filters) {
 export async function visualizarTransmissao(idTransmissao) {
   const docSnap = await transmissaoRef.doc(String(idTransmissao)).get();
 
-  if (!docSnap.exists) 
+  if (!docSnap.exists)
     throw Object.assign(new Error('Transmissão não encontrada'), { status: 404 });
 
   const data = docSnap.data();
@@ -82,11 +82,11 @@ export async function criarTransmissao(data) {
 export async function editarTransmissao(data) {
   const docSnap = await transmissaoRef.doc(String(data.idTransmissao)).get();
 
-  if (!docSnap.exists) 
+  if (!docSnap.exists)
     throw Object.assign(new Error('Transmissão não encontrada'), { status: 404 });
 
   const docData = docSnap.data();
-  if (docData.status === 'publicado') 
+  if (docData.status === 'publicado')
     throw Object.assign(new Error('Transmissão não pode ser editada'), { status: 400 });
 
   await transmissaoRef.doc(String(data.idTransmissao)).update({
@@ -115,7 +115,7 @@ export async function editarTransmissao(data) {
 export async function publicarTransmissao(data) {
   const docSnap = await transmissaoRef.doc(String(data.idTransmissao)).get();
 
-  if (!docSnap.exists) 
+  if (!docSnap.exists)
     throw Object.assign(new Error('Transmissão não encontrada'), { status: 404 });
 
   await transmissaoRef.doc(String(data.idTransmissao)).update({
@@ -137,7 +137,7 @@ export async function publicarTransmissao(data) {
 export async function deletarTransmissao(data) {
   const docSnap = await transmissaoRef.doc(String(data.idTransmissao)).get();
 
-  if (!docSnap.exists) 
+  if (!docSnap.exists)
     throw Object.assign(new Error('Transmissão não encontrada'), { status: 404 });
 
   await transmissaoRef.doc(String(data.idTransmissao)).delete();

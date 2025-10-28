@@ -5,7 +5,6 @@ export const SchemaEnviarDenuncia = z.object({
     alvoId: idSchema,
     tipo: tipoAtividadeDenunciaSchema,
     descricao: textoLongoSchema,
-    motivo: textoSchema,
-    alvoId: idSchema
+    motivo: textoSchema
 })
     

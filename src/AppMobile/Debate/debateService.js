@@ -2,7 +2,6 @@ import { atualizarDescricoes } from '../../utils/atualizarDescricoes.js';
 import { db, admin } from '../../plugins/bd.js';
 import { registrarAtividade } from '../../utils/registroAtividade.js';
 import { obterDadosUsuario } from '../../utils/obterDadosUsuario.js';
-import { obterCategoriaUsuario } from '../../utils/obterCategoriasUsuario.js';
 import { getNextId } from '../../utils/getNextId.js';
 
 const debateRef = db.collection('Debate');
@@ -13,26 +12,18 @@ function formatarData(timestamp) {
   return timestamp ? timestamp.toDate().toLocaleString('pt-BR') : null;
 }
 
-
 export async function pesquisarDebate(data) {
-  const categorias = await obterCategoriaUsuario(data.idUsuario);
-
   let query = debateRef
     .select('titulo', 'subtitulo', 'idAutor', 'imagem', 'criadoEm', 'fotoUrlAutor', 'nomeAutor', 'qtComentario', 'tema')
     .orderBy('criadoEm', 'desc');
 
   if (data.titulo) query = query.where('titulo', '==', data.titulo);
-  if (data.idUsuario) query = query.where('idAutor', '==', data.idUsuario);
+  if (data.debateProprio === true) query = query.where('idAutor', '==', data.idUsuario);
 
   const resultado = await query.get();
   if (resultado.empty) return [];
 
-  const filtrado = resultado.docs.filter(doc => {
-    const tema = doc.data().tema;
-    return categorias.includes('todos') || categorias.includes(tema);
-  });
-
-  return filtrado.map(doc => {
+  return resultado.docs.map(doc => {
     const debate = doc.data();
     return {
       id: doc.id,
@@ -55,7 +46,7 @@ export async function visualizarDebate(idDebate) {
     .get();
 
   const descricaoQuery = await descricaoRef
-    .where('tipo', '==', 'Debate')
+    .where('tipoAtividade', '==', 'Debate')
     .where('idItem', '==', idDebate)
     .get();
 
@@ -85,6 +76,7 @@ export async function visualizarDebate(idDebate) {
 }
 
 export async function criarDebate(data) {
+  console.log(data);
   const idDebate = await getNextId('Debate');
   const { nome, fotoUrl } = await obterDadosUsuario(data.idAutor);
 
@@ -113,7 +105,7 @@ export async function criarDebate(data) {
     tipo: 'Debate',
     titulo: data.titulo,
     descricao: `Você criou um novo Debate`,
-    acao: 'Debate criada',
+    acao: 'Debate criado',
     idUsuario: data.idAutor,
     idAtividade: String(idDebate),
   });
@@ -125,9 +117,8 @@ export async function editarDebate(data) {
     throw Object.assign(new Error('Debate não encontrado'), { status: 404 });
 
   const debateData = debateDoc.data();
-  const { role } = await obterDadosUsuario(data.idUsuario);
 
-  if (debateData.idAutor !== data.idUsuario && role === 'cidadao')
+  if (debateData.idAutor !== data.idUsuario)
     throw Object.assign(new Error('Você não pode alterar esse Debate'), { status: 403 });
 
   await debateRef.doc(String(data.idDebate)).update({
@@ -162,13 +153,16 @@ export async function deletarDebate(data) {
     throw Object.assign(new Error('Debate não encontrado'), { status: 404 });
 
   const debateData = debateDoc.data();
-  const { role } = await obterDadosUsuario(data.idUsuario);
 
-  if (debateData.idAutor !== data.idUsuario && role === 'cidadao')
+  if (debateData.idAutor !== data.idUsuario)
     throw Object.assign(new Error('Você não pode excluir esse Debate'), { status: 403 });
 
   await debateRef.doc(String(data.idDebate)).delete();
-  await atualizarDescricoes([], 'Debate', String(data.idDebate));
+  await atualizarDescricoes({
+      descricoes: [],
+      tipoAtividade: 'Debate',
+      idItem: String(data.idDebate),
+    });
 
   await registrarAtividade({
     tipo: 'Debate',

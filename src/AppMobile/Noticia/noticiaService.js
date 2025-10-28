@@ -1,5 +1,4 @@
 import { db } from '../../plugins/bd.js';
-import { obterCategoriaUsuario } from '../../utils/obterCategoriasUsuario.js';
 
 const noticiaRef = db.collection('Noticia');
 
@@ -8,11 +7,8 @@ function formatarData(timestamp) {
 }
 
 export async function pesquisarNoticia(filters) {
-  // Recebe o idUsuario pelo filters
-  const categorias = await obterCategoriaUsuario(filters.idUsuario);
-
   let query = noticiaRef
-    .select('titulo', 'tema', 'imagem', 'fonte', 'resumo', 'linkExterno', 'criadoEm', 'publicadoEm', 'status')
+    .select('titulo', 'tema', 'imagem', 'fonte', 'criadoEm', 'publicadoEm', 'status')
     .where('status', '==', 'publicado')
     .orderBy('criadoEm', 'desc');
 
@@ -21,13 +17,7 @@ export async function pesquisarNoticia(filters) {
   const resultado = await query.get();
   if (resultado.empty) return [];
 
-  // Filtrar por categorias do usuário
-  const filtrado = resultado.docs.filter(doc => {
-    const tema = doc.data().tema;
-    return categorias.includes('todos') || categorias.includes(tema);
-  });
-
-  return filtrado.map(doc => ({
+  return resultado.docs.map(doc => ({
     id: Number(doc.id),
     ...doc.data(),
     criadoEm: formatarData(doc.data().criadoEm),

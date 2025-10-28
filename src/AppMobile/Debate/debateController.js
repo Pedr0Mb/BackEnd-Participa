@@ -1,14 +1,16 @@
+import { id } from 'zod/locales';
 import * as debateService from './debateService.js'
 import * as debateValidator from './debateValidator.js'
 
 export async function pesquisarDebateController(req, res, next) {  
   try {
+    const idUsuario = req.usuario.id;
     const data = debateValidator.SchemaPesquisarPauta.parse({
-      idUsuario: req.query.idUsuario ? Number(req.query.idUsuario) : null,
+      debateProprio: toBoolean(req.query.debateProprio),
       titulo: req.query.titulo || null,
     });
 
-    const pautas = await debateService.pesquisarPauta(data);
+    const pautas = await debateService.pesquisarDebate({...data,  idUsuario,});
     return res.status(200).json(pautas);
   } catch(err) {
     next(err);
@@ -18,7 +20,7 @@ export async function pesquisarDebateController(req, res, next) {
 export async function visualizarDebateController(req, res, next) {
   try {
     const { idDebate } = debateValidator.SchemaPautaId.parse({ idDebate: Number(req.params.id) });
-    const pauta = await debateService.visualizarPauta(idDebate);
+    const pauta = await debateService.visualizarDebate(idDebate);
     return res.status(200).json(pauta);
   } catch (err) {
     next(err);
@@ -35,7 +37,7 @@ export async function criarDebateController(req, res, next) {
       imagem: req.body.imagem
     });
 
-    await debateService.criarPauta({ idAutor: req.usuario.id, ...data });
+    await debateService.criarDebate({ idAutor: req.usuario.id, ...data });
     return res.sendStatus(201);
   } catch(err) {
     next(err);
@@ -53,7 +55,7 @@ export async function editarDebateController(req, res, next) {
       imagem: req.body.imagem 
     });
 
-    await debateService.editarPauta({ idUsuario: req.usuario.id, ...data });
+    await debateService.editarDebate({ idUsuario: req.usuario.id, ...data });
     return res.sendStatus(204);
   } catch(err) {
     next(err);
@@ -64,9 +66,15 @@ export async function removerDebateController(req, res, next) {
   try {
     const idUsuario = req.usuario.id;
     const { idDebate } = debateValidator.SchemaPautaId.parse({ idDebate: Number(req.params.id) });
-    await debateService.deletarPauta({ idUsuario, idDebate });
+    await debateService.deletarDebate({ idUsuario, idDebate });
     return res.sendStatus(204);
   } catch(err) {
     next(err);
   }
+}
+
+function toBoolean(value) {
+  if (value === 'true') return true;
+  if (value === 'false') return false;
+  return null;
 }

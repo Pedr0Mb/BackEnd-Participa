@@ -25,5 +25,5 @@ export const SchemaEditarUsuario = z.object({
 })
 
 export const SchemaUsuarioID = z.object({
-  id: idSchema,
+  idUsuario: idSchema,
 })

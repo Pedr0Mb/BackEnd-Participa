@@ -11,6 +11,7 @@ function formatarData(timestamp) {
 }
 
 export async function pesquisarDenuncia(data) {
+  console.log(data)
   let query = denunciaRef.select('alvoId', 'tipo', 'motivo', 'idReportante', 'status')
 
   if (data.tipo) query = query.where('tipo', '==', data.tipo)

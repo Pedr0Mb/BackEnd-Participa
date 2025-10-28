@@ -18,7 +18,7 @@ export async function pesquisarNoticia(filters) {
 
   const resultado = await query.get();
 
-  if (resultado.empty) return { success: true, message: 'Nenhuma notícia encontrada', data: [] };
+  if (resultado.empty) return [];
 
   return resultado.docs.map(doc => {
       const data = doc.data();

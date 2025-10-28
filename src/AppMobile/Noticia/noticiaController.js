@@ -3,12 +3,11 @@ import * as noticiaValidation from './noticiaValidator.js';
 
 export async function pesquisarNoticiaController(req, res, next) {
   try {
-    const idUsuario = req.usuario.id; // pega o id do usuário autenticado
     const filters = noticiaValidation.SchemaPesquisarNoticia.parse({
       titulo: req.query.titulo || null,
     });
 
-    const noticias = await noticiaService.pesquisarNoticia({ idUsuario, ...filters });
+    const noticias = await noticiaService.pesquisarNoticia({ ...filters });
 
     return res.status(200).json(noticias);
   } catch (err) {

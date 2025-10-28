@@ -22,6 +22,6 @@ export const SchemaCriarTransmissao = z.object({
   tema: textoSchema.optional().nullable(),
 })
 
-export const SchemaEditarTransmissao = SchemaCriarTransmissao.safeExntend({
+export const SchemaEditarTransmissao = SchemaCriarTransmissao.safeExtend({
   idTransmissao: idSchema,
 })

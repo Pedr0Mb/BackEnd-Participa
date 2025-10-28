@@ -2,6 +2,7 @@ import { db } from '../../plugins/bd.js'
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import dotenv from 'dotenv'; 
+import { user } from 'firebase-functions/v1/auth';
 dotenv.config();
 
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -9,12 +10,17 @@ const usuarioRef = db.collection('Usuario')
 
 export async function authGestor(data) {
   const snapshot = await usuarioRef.where('cpf', '==', data.cpf).get();
+
   if (snapshot.empty) 
     throw Object.assign(new Error('Usuário não encontrado'), { status: 404 });
 
   const userDoc = snapshot.docs[0];
   const userData = userDoc.data();
+
   const senhaValida = await bcrypt.compare(data.senha, userData.senha);
+
+  if(userData.role === 'cidadao')
+    throw Object.assign(new Error('Acesso negado para cidadãos'), {status: 403})
 
   if(!userData.ativo)
     throw Object.assign(new Error('Usuario inativo'), {status: 403})

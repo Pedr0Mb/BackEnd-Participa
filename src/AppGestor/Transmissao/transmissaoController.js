@@ -60,7 +60,7 @@ export async function editarTransmissaoController(req, res, next) {
     const idUsuario = req.usuario.id;
 
     const data = validacaoTransmissao.SchemaEditarTransmissao.parse({
-      idTransmissao: Number(req.params.idTransmissao),
+      idTransmissao: Number(req.params.id),
       titulo: req.body.titulo,
       subtitulo: req.body.subtitulo,
       descricao: req.body.descricao,
@@ -85,7 +85,7 @@ export async function publicarTransmissaoController(req, res, next) {
     const idUsuario = req.usuario.id;
 
     const { idTransmissao } = validacaoTransmissao.SchemaTransmissaoID.parse({
-      idTransmissao: Number(req.params.idTransmissao),
+      idTransmissao: Number(req.params.id),
     });
 
     await transmissaoService.publicarTransmissao({ idUsuario, idTransmissao });
@@ -101,7 +101,7 @@ export async function deletarTransmissaoController(req, res, next) {
     const idUsuario = req.usuario.id;
 
     const { idTransmissao } = validacaoTransmissao.SchemaTransmissaoID.parse({
-      idTransmissao: Number(req.params.idTransmissao),
+      idTransmissao: Number(req.params.id),
     });
 
     await transmissaoService.deletarTransmissao({ idUsuario, idTransmissao });

@@ -10,7 +10,7 @@ import usuariosRoutes from './Usuario/usuario.js'
 
 const router = express.Router();
 
-router.use('auth', authRoutes)
+router.use('/auth', authRoutes)
 router.use('/comentarios', comentarioRoutes)
 router.use('/debates', debateRoutes);
 router.use('/denuncias', denunciaRoutes);

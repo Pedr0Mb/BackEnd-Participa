@@ -41,7 +41,8 @@ export async function verHistoricoController(req, res, next) {
 
 export async function visualizarPreferencias(req, res, next) {
   try {
-    const resultado = await usuarioServices.verPreferencias({ idUsuario: req.usuario.id });
+    const idUsuario = Number(req.usuario.id);
+    const resultado = await usuarioServices.verPreferencias(idUsuario);
     return res.status(200).json(resultado);
   } catch (err) {
     next(err);

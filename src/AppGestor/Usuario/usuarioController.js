@@ -1,5 +1,6 @@
 import * as admValidation from './usuarioValidator.js'
 import * as administradorService from './usuarioService.js'
+import { id } from 'zod/locales'
 
 export async function pesquisarUsuarioController(req, res, next) {
   try {
@@ -18,7 +19,7 @@ export async function pesquisarUsuarioController(req, res, next) {
 
 export async function visualizarUsuarioController(req, res, next) {
   try {
-    const { idUsuario } = admValidation.SchemaUsuarioID.parse({ idUsuario: Number(req.params.id) })
+    const { idUsuario } = admValidation.SchemaUsuarioID.parse({ idUsuario: Number(Number(req.params.id)) })
     const usuario = await administradorService.visualizarUsuario(idUsuario)
     return res.status(200).json(usuario)
   } catch (err) {
@@ -59,11 +60,28 @@ export async function verHistoricoController(req, res, next) {
 
 export async function promoverUserController(req,res,next) {
   try {
+    const idAdm = req.usuario.id
+
     const {idUsuario} = admValidation.SchemaUsuarioID.parse({
-      idUsuario: req.params.id
+      idUsuario: Number(req.params.id)
     })
 
-    await administradorService.promoverUsuario(idUsuario)
+    await administradorService.promoverUsuario({ idAdm, idUsuario })
+    return res.sendStatus(204)
+  } catch (err) {
+    next(err)
+  }
+}
+
+export async function rebaixarUserController(req,res,next) {
+  try {
+    const idAdm = req.usuario.id
+
+    const {idUsuario} = admValidation.SchemaUsuarioID.parse({
+      idUsuario: Number(req.params.id)
+    })
+
+    await administradorService.rebaixarUsuario({idAdm, idUsuario})
     return res.sendStatus(204)
   } catch (err) {
     next(err)
@@ -72,11 +90,26 @@ export async function promoverUserController(req,res,next) {
 
 export async function desativarUserController(req,res,next) {
   try {
+    const idAdm = req.usuario.id
     const {idUsuario} = admValidation.SchemaUsuarioID.parse({
-      idUsuario: req.params.id
+      idUsuario: Number(req.params.id)
     })
 
-    await administradorService.desativarUser(idUsuario)
+    await administradorService.desativarUser({idAdm, idUsuario})
+    return res.sendStatus(204)
+  } catch (err) {
+    next(err)
+  }
+}
+
+export async function ativarUserController(req,res,next) {
+  try {
+    const idAdm = req.usuario.id
+    const {idUsuario} = admValidation.SchemaUsuarioID.parse({
+      idUsuario: Number(req.params.id)
+    })
+
+    await administradorService.ativarUser({ idAdm, idUsuario})
     return res.sendStatus(204)
   } catch (err) {
     next(err)

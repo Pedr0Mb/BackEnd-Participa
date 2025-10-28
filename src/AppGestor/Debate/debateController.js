@@ -16,8 +16,7 @@ export async function pesquisarDebateController(req, res, next) {
 
 export async function visualizarDebateController(req, res, next) {
   try {
-    const { idDebate } = debateValidator.SchemaPautaId.parse({ idDebate: Number(req.params.id) });
-    if (isNaN(idDebate)) return res.status(400).json({ error: 'ID inválido' });
+    const { idDebate } = debateValidator.SchemaDebateId.parse({ idDebate: Number(req.params.id) });
 
     const resultado = await debateService.visualizarDebate(idDebate);
     return res.status(200).json(resultado);
@@ -28,7 +27,7 @@ export async function visualizarDebateController(req, res, next) {
 
 export async function editarDebateController(req, res, next) {
   try {
-    const parseData = debateValidator.SchemaEditarPauta.parse({
+    const parseData = debateValidator.SchemaEditarDebate.parse({
       idDebate: Number(req.params.id),
       titulo: req.body.titulo,
       subtitulo: req.body.subtitulo,
@@ -47,7 +46,7 @@ export async function editarDebateController(req, res, next) {
 export async function removerDebateController(req, res, next) {
   try {
     const idUsuario = req.usuario.id;
-    const { idDebate } = debateValidator.SchemaPautaId.parse({ idDebate: Number(req.params.id) });
+    const { idDebate } = debateValidator.SchemaDebateId.parse({ idDebate: Number(req.params.id) });
     if (isNaN(idDebate)) return res.status(400).json({ error: 'ID inválido' });
 
     await debateService.deletarDebate({ idUsuario, idDebate });
