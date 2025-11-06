@@ -1,55 +1,57 @@
-import { db, admin } from '../../plugins/bd.js';
-import { registrarAtividade } from '../../utils/registroAtividade.js';
-import { getNextId } from '../../utils/getNextId.js';
+import { db, admin } from '../../plugins/bd.js'
+import { registrarAtividade } from '../../utils/registroAtividade.js'
+import { getNextId } from '../../utils/getNextId.js'
+import { formatarData } from '../../utils/formatarData.js'
 
-const transmissaoRef = db.collection('Transmissao');
+const transmissaoRef = db.collection('Transmissao')
 
-function formatarData(timestamp) {
-  return timestamp ? timestamp.toDate().toLocaleString('pt-BR') : null;
-}
-
-// ================= Pesquisar transmissões =================
 export async function pesquisarTransmissao(filters) {
   let query = transmissaoRef.select(
-    'idTransmissao', 'titulo', 'imagem', 'foto', 'tema', 'criadoEm', 'publicadoEm', 'status'
-  );
+    'idTransmissao', 
+    'titulo', 
+    'imagem', 
+    'foto', 
+    'tema', 
+    'criadoEm', 
+    'publicadoEm', 
+    'status'
+  )
 
-  if (filters.titulo) query = query.where('titulo', '==', filters.titulo);
-  if (filters.status) query = query.where('status', '==', filters.status);
+  if (filters.titulo) query = query.where('titulo', '==', filters.titulo)
+  if (filters.status) query = query.where('status', '==', filters.status)
 
-  const resultado = await query.get();
-  if (resultado.empty) return [];
+  const resultado = await query.get()
+  if (resultado.empty) return []
 
   return resultado.docs.map(doc => {
-    const data = doc.data();
+    const data = doc.data()
     return {
       idTransmissao: Number(doc.id),
       ...data,
       criadoEm: formatarData(data.criadoEm),
       publicadoEm: formatarData(data.publicadoEm),
-    };
-  });
+    }
+  })
 }
 
-// ================= Visualizar transmissão =================
 export async function visualizarTransmissao(idTransmissao) {
-  const docSnap = await transmissaoRef.doc(String(idTransmissao)).get();
+  const docSnap = await transmissaoRef.doc(String(idTransmissao)).get()
 
   if (!docSnap.exists)
-    throw Object.assign(new Error('Transmissão não encontrada'), { status: 404 });
+    throw Object.assign(new Error('Transmissão não encontrada'), { status: 404 })
 
-  const data = docSnap.data();
+  const data = docSnap.data()
+  
   return {
     idTransmissao: Number(docSnap.id),
     ...data,
     criadoEm: formatarData(data.criadoEm),
     publicadoEm: formatarData(data.publicadoEm),
-  };
+  }
 }
 
-// ================= Criar transmissão =================
 export async function criarTransmissao(data) {
-  const idTransmissao = await getNextId('Transmissao');
+  const idTransmissao = await getNextId('Transmissao')
 
   await transmissaoRef.doc(String(idTransmissao)).set({
     titulo: data.titulo,
@@ -66,7 +68,7 @@ export async function criarTransmissao(data) {
     status: 'rascunho',
     ativo: true,
     criadoEm: admin.firestore.FieldValue.serverTimestamp(),
-  });
+  })
 
   await registrarAtividade({
     tipo: 'Transmissão',
@@ -75,19 +77,18 @@ export async function criarTransmissao(data) {
     acao: 'Transmissão criada',
     idUsuario: data.idUsuario,
     idAtividade: idTransmissao,
-  });
+  })
 }
 
-// ================= Editar transmissão =================
 export async function editarTransmissao(data) {
-  const docSnap = await transmissaoRef.doc(String(data.idTransmissao)).get();
+  const docSnap = await transmissaoRef.doc(String(data.idTransmissao)).get()
 
   if (!docSnap.exists)
-    throw Object.assign(new Error('Transmissão não encontrada'), { status: 404 });
+    throw Object.assign(new Error('Transmissão não encontrada'), { status: 404 })
 
-  const docData = docSnap.data();
+  const docData = docSnap.data()
   if (docData.status === 'publicado')
-    throw Object.assign(new Error('Transmissão não pode ser editada'), { status: 400 });
+    throw Object.assign(new Error('Transmissão não pode ser editada'), { status: 400 })
 
   await transmissaoRef.doc(String(data.idTransmissao)).update({
     titulo: data.titulo,
@@ -99,7 +100,7 @@ export async function editarTransmissao(data) {
     linkExterno: data.linkExterno,
     imagem: data.imagem,
     foto: data.foto,
-  });
+  })
 
   await registrarAtividade({
     tipo: 'Transmissão',
@@ -108,20 +109,19 @@ export async function editarTransmissao(data) {
     acao: 'Transmissão editada',
     idUsuario: data.idUsuario,
     idAtividade: data.idTransmissao,
-  });
+  })
 }
 
-// ================= Publicar transmissão =================
 export async function publicarTransmissao(data) {
-  const docSnap = await transmissaoRef.doc(String(data.idTransmissao)).get();
+  const docSnap = await transmissaoRef.doc(String(data.idTransmissao)).get()
 
   if (!docSnap.exists)
-    throw Object.assign(new Error('Transmissão não encontrada'), { status: 404 });
+    throw Object.assign(new Error('Transmissão não encontrada'), { status: 404 })
 
   await transmissaoRef.doc(String(data.idTransmissao)).update({
     status: 'publicado',
     publicadoEm: admin.firestore.FieldValue.serverTimestamp(),
-  });
+  })
 
   await registrarAtividade({
     tipo: 'Transmissão',
@@ -130,17 +130,16 @@ export async function publicarTransmissao(data) {
     acao: 'Transmissão publicada',
     idUsuario: data.idUsuario,
     idAtividade: data.idTransmissao,
-  });
+  })
 }
 
-// ================= Deletar transmissão =================
 export async function deletarTransmissao(data) {
-  const docSnap = await transmissaoRef.doc(String(data.idTransmissao)).get();
+  const docSnap = await transmissaoRef.doc(String(data.idTransmissao)).get()
 
   if (!docSnap.exists)
-    throw Object.assign(new Error('Transmissão não encontrada'), { status: 404 });
+    throw Object.assign(new Error('Transmissão não encontrada'), { status: 404 })
 
-  await transmissaoRef.doc(String(data.idTransmissao)).delete();
+  await transmissaoRef.doc(String(data.idTransmissao)).delete()
 
   await registrarAtividade({
     tipo: 'Transmissão',
@@ -149,5 +148,5 @@ export async function deletarTransmissao(data) {
     acao: 'Transmissão excluída',
     idUsuario: data.idUsuario,
     idAtividade: data.idTransmissao,
-  });
+  })
 }

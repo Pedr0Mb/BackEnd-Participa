@@ -1,25 +1,12 @@
-import express from 'express';
+import express from 'express'
 import * as comentarioController from './comentarioController.js'
-import { autenticarToken } from '../../middlewares/autenticarToken.js';
+import { autenticarToken } from '../../middlewares/autenticarToken.js'
 
-const router = express.Router();
+const router = express.Router()
+router.use(autenticarToken)
 
-router.post(
-    '/', 
-    autenticarToken,
-    comentarioController.criarComentarioController
-)
+router.post('/', comentarioController.criarComentarioController)
+router.put('/:id', comentarioController.editarComentarioController)
+router.delete('/:id', comentarioController.deletarComentarioController)
 
-router.put(
-    '/:id', 
-    autenticarToken, 
-    comentarioController.editarComentarioController
-)
-
-router.delete(
-    '/:id', 
-    autenticarToken, 
-    comentarioController.deletarComentarioController
-)
-
-export default router;
+export default router

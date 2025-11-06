@@ -17,7 +17,7 @@ export function verificarPermissao(cargosPermitidos) {
 
     const cargoValido = cargosPermitidos.includes(cargo);
 
-    if (!cargoValido) { 
+    if (!cargoValido) {
       return res.status(403).json({ mensagem: 'Acesso negado: permissão insuficiente' })
     }
 

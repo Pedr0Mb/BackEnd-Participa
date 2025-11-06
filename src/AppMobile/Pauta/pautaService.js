@@ -1,23 +1,29 @@
 import { db, admin } from '../../plugins/bd.js'
 import { registrarAtividade } from '../../utils/registroAtividade.js'
 import { getNextId } from '../../utils/getNextId.js'
+import { formatarData } from '../../utils/formatarData.js'
 
-function formatarData(timestamp) {
-  return timestamp ? timestamp.toDate().toLocaleString('pt-BR') : null;
-}
-
-const pautaRef = db.collection('Pauta') 
+const pautaRef = db.collection('Pauta')
 const descricaoRef = db.collection('Descricao')
 const votoRef = db.collection('Voto')
 
 export async function pesquisarPauta(data) {
-  let query = pautaRef.select('titulo','status','inicioVotacao','fimVotacao','imagem','foto','tema')
-  .where('status','==','aberta')
+  let query = pautaRef.select(
+    'titulo',
+    'status',
+    'inicioVotacao',
+    'fimVotacao',
+    'imagem',
+    'foto',
+    'tema'
+  )
 
-  if(data.titulo) query = query.where('titulo','==',data.titulo)
+    .where('status', '==', 'aberta')
 
-  const resultado = await query.orderBy('inicioVotacao','asc').get()
-  if(resultado.empty) return []
+  if (data.titulo) query = query.where('titulo', '==', data.titulo)
+
+  const resultado = await query.orderBy('inicioVotacao', 'asc').get()
+  if (resultado.empty) return []
 
   return resultado.docs.map(doc => {
     const d = doc.data();
@@ -34,21 +40,21 @@ export async function pesquisarPauta(data) {
 
 export async function visualizarPauta(idPauta) {
   const doc = await pautaRef.doc(String(idPauta)).get();
-  if (!doc.exists) 
+
+  if (!doc.exists)
     throw Object.assign(new Error('Pauta não encontrado'), { status: 404 })
-  
+
   const data = doc.data();
   const agora = new Date();
-  
-  if (data.status === 'aberta' && agora > data.fimVotacao.toDate()) {
+
+  if (data.status === 'aberta' && agora > data.fimVotacao.toDate())
     await pautaRef.doc(String(idPauta)).update({ status: 'encerrada' });
-  }
-  
+
   const descricoesSnapshot = await descricaoRef
-  .where('tipoAtividade', '==', 'Pauta')
-  .where('idItem', '==', Number(idPauta))
-  .get();
-  
+    .where('tipoAtividade', '==', 'Pauta')
+    .where('idItem', '==', Number(idPauta))
+    .get();
+
   const descricoes = descricoesSnapshot.docs.map(descDoc => {
     const descData = descDoc.data();
     return {
@@ -59,7 +65,7 @@ export async function visualizarPauta(idPauta) {
       atualizadoEm: formatarData(descData.atualizadoEm)
     };
   });
-  
+
   return {
     id: Number(doc.id),
     ...data,
@@ -79,6 +85,7 @@ export async function registrarVoto(data) {
 
   const votacao = pautaDoc.data();
   const agora = new Date();
+
   const inicio = votacao.inicioVotacao?.toDate ? votacao.inicioVotacao.toDate() : new Date(votacao.inicioVotacao);
   const fim = votacao.fimVotacao?.toDate ? votacao.fimVotacao.toDate() : new Date(votacao.fimVotacao);
 
@@ -91,7 +98,7 @@ export async function registrarVoto(data) {
     .limit(1)
     .get();
 
-  if (!votoExistente.empty) 
+  if (!votoExistente.empty)
     throw Object.assign(new Error('Você já votou nesta pauta'), { status: 400 });
 
   const novasOpcoes = votacao.opcoes.map(opcao =>
@@ -100,9 +107,7 @@ export async function registrarVoto(data) {
       : opcao
   );
 
-  await pautaRef.doc(String(data.idPauta)).update({
-    opcoes: novasOpcoes
-  });
+  await pautaRef.doc(String(data.idPauta)).update({ opcoes: novasOpcoes });
 
   const novoIdVoto = await getNextId('Voto');
 

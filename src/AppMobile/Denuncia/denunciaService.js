@@ -8,6 +8,7 @@ const pautaRef = db.collection('Debate');
 
 export async function enviarDenuncia(data) {
   let alvoDoc;
+
   if (data.tipo === 'Debate') alvoDoc = await pautaRef.doc(String(data.alvoId)).get();
   else if (data.tipo === 'Comentario') alvoDoc = await comentarioRef.doc(String(data.alvoId)).get();
   else throw Object.assign(new Error('Tipo de denúncia inválido'), { status: 400 });

@@ -4,19 +4,19 @@ import { getNextId } from '../../utils/getNextId.js'
 
 const comentarioRef = db.collection('Comentario')
 const debateRef = db.collection('Debate')
-const usuarioRef = db.collection('Usuario')
 
 export async function criarComentario(data) {
   const debateDoc = await debateRef.doc(String(data.idDebate)).get();
-  if (!debateDoc.exists) 
+
+  if (!debateDoc.exists)
     throw Object.assign(new Error('Debate não encontrado'), { status: 404 });
 
   if (data.parentComentario) {
     const parentDoc = await comentarioRef.doc(String(data.parentComentario)).get();
-    if (!parentDoc.exists) 
+    if (!parentDoc.exists)
       throw Object.assign(new Error('Comentário pai não encontrado'), { status: 404 });
 
-    if (parentDoc.data().idDebate !== data.idDebate) 
+    if (parentDoc.data().idDebate !== data.idDebate)
       throw Object.assign(new Error('Comentário  pai é de outro debate'), { status: 400 });
   }
 
@@ -49,10 +49,10 @@ export async function criarComentario(data) {
 export async function deletarComentario(data) {
   const comentarioDoc = await comentarioRef.doc(String(data.idComentario)).get();
 
-  if (!comentarioDoc.exists) 
+  if (!comentarioDoc.exists)
     throw Object.assign(new Error('Comentário não encontrado'), { status: 400 });
 
-  if (comentarioDoc.data().idUsuario !== data.idUsuario) 
+  if (comentarioDoc.data().idUsuario !== data.idUsuario)
     throw Object.assign(new Error('Voçê não tem permissão para remover esse debate'), { status: 403 });
 
   await comentarioRef.doc(String(data.idComentario)).delete();
@@ -74,10 +74,10 @@ export async function deletarComentario(data) {
 export async function editarComentario(data) {
   const comentarioDoc = await comentarioRef.doc(String(data.idComentario)).get()
 
-  if (!comentarioDoc.exists) 
+  if (!comentarioDoc.exists)
     throw Object.assign(new Error('Comentário não encontrado'), { status: 404 });
 
-  if (comentarioDoc.data().idUsuario !== data.idUsuario) 
+  if (comentarioDoc.data().idUsuario !== data.idUsuario)
     throw Object.assign(new Error('Voçê não tem permissão para remover esse comentario'), { status: 403 });
 
   await comentarioRef.doc(String(data.idComentario)).update({

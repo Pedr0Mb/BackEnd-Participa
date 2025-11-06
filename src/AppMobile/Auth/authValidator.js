@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import {
-    emailSchema,  
-    senhaSchema, 
+  emailSchema,
+  senhaSchema,
 } from '../../utils/commonValidator.js'
 
 export const SchemaLoginGoogle = z.object({
@@ -10,7 +10,7 @@ export const SchemaLoginGoogle = z.object({
 
 
 export const SchemaLogarUsuarioEmail = z.object({
-email: emailSchema,
-senha: senhaSchema,
+  email: emailSchema,
+  senha: senhaSchema,
 })
 

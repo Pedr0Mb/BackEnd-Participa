@@ -1,38 +1,38 @@
 import { db } from '../../plugins/bd.js'
-import jwt from 'jsonwebtoken';
-import bcrypt from 'bcrypt';
-import dotenv from 'dotenv'; 
-import { user } from 'firebase-functions/v1/auth';
-dotenv.config();
+import jwt from 'jsonwebtoken'
+import bcrypt from 'bcrypt'
+import dotenv from 'dotenv'
 
-const JWT_SECRET = process.env.JWT_SECRET;
+dotenv.config()
+
+const JWT_SECRET = process.env.JWT_SECRET
 const usuarioRef = db.collection('Usuario')
 
 export async function authGestor(data) {
-  const snapshot = await usuarioRef.where('cpf', '==', data.cpf).get();
+  const snapshot = await usuarioRef.where('cpf', '==', data.cpf).get()
 
   if (snapshot.empty) 
-    throw Object.assign(new Error('Usuário não encontrado'), { status: 404 });
+    throw Object.assign(new Error('Usuário não encontrado'), { status: 404 })
 
-  const userDoc = snapshot.docs[0];
-  const userData = userDoc.data();
+  const userDoc = snapshot.docs[0]
+  const userData = userDoc.data()
 
-  const senhaValida = await bcrypt.compare(data.senha, userData.senha);
+  const senhaValida = await bcrypt.compare(data.senha, userData.senha)
 
-  if(userData.role === 'cidadao')
-    throw Object.assign(new Error('Acesso negado para cidadãos'), {status: 403})
+  if (userData.role === 'cidadao')
+    throw Object.assign(new Error('Acesso negado para cidadãos'), { status: 403 })
 
-  if(!userData.ativo)
-    throw Object.assign(new Error('Usuario inativo'), {status: 403})
+  if (!userData.ativo)
+    throw Object.assign(new Error('Usuario inativo'), { status: 403 })
 
-  if (!senhaValida) 
-    throw Object.assign(new Error('Senha incorreta'), { status: 401 });
+  if (!senhaValida)
+    throw Object.assign(new Error('Senha incorreta'), { status: 401 })
 
-  const payload = { idUsuario: Number(userDoc.id) }; 
-  const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '24h' });
+  const payload = { idUsuario: Number(userDoc.id) }
+  const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '24h' })
 
   return {
-    token,  
+    token,
     usuario: {
       id: Number(userDoc.id),
       nome: userData.nome,
@@ -40,7 +40,7 @@ export async function authGestor(data) {
       email: userData.email,
       role: userData.role,
     },
-  };
+  }
 }
 
 

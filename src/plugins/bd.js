@@ -1,8 +1,7 @@
 import admin from 'firebase-admin';
-import dotenv from 'dotenv'; 
+import dotenv from 'dotenv';
 dotenv.config();
 
-// 🔹 Configuração do Firebase Admin usando variáveis de ambiente do Render
 const serviceAccount = {
   type: process.env.FIREBASE_TYPE,
   project_id: process.env.FIREBASE_PROJECT_ID,
@@ -16,19 +15,11 @@ const serviceAccount = {
   client_x509_cert_url: process.env.FIREBASE_CLIENT_CERT_URL,
 };
 
-// 🔹 Inicializa Firebase Admin
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   storageBucket: `${process.env.FIREBASE_PROJECT_ID}.appspot.com`,
 });
 
-// 🔹 Firestore
 const db = admin.firestore();
-
-// 🔹 Storage
-const bucket = admin.storage().bucket();
-
-// 🔹 Auth (para gerenciar usuários)
-const auth = admin.auth();
 
 export { db, auth, bucket, admin };

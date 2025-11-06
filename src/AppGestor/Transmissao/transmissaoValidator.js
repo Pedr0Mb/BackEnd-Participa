@@ -12,14 +12,14 @@ export const SchemaTransmissaoID = z.object({
 
 export const SchemaCriarTransmissao = z.object({
   titulo: textoSchema,
-  subtitulo: textoSchema.optional().nullable(),
-  descricao: textoLongoSchema.optional().nullable(),
-  linkExterno: linkSchema.optional().nullable(),
-  fonte: textoSchema.optional().nullable(),
-  tempo: textoSchema.optional().nullable(),
-  foto: linkSchema.optional().nullable(),
-  imagem: linkSchema.optional().nullable(),
-  tema: textoSchema.optional().nullable(),
+  subtitulo: textoSchema,
+  descricao: textoLongoSchema,
+  linkExterno: linkSchema,
+  fonte: textoSchema,
+  tempo: textoSchema,
+  foto: linkSchema,
+  imagem: linkSchema,
+  tema: textoSchema,
 })
 
 export const SchemaEditarTransmissao = SchemaCriarTransmissao.safeExtend({

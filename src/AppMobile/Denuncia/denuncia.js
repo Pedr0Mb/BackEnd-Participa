@@ -4,6 +4,6 @@ import { autenticarToken } from '../../middlewares/autenticarToken.js'
 
 const router = express.Router()
 
-router.post('/' , autenticarToken, denunciaController.enviarDenunciaController)
+router.post('/', autenticarToken, denunciaController.enviarDenunciaController)
 
 export default router

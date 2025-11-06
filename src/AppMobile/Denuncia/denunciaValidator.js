@@ -1,5 +1,5 @@
-import {z} from 'zod'
-import {idSchema, tipoAtividadeDenunciaSchema, textoLongoSchema, textoSchema} from '../../utils/commonValidator.js'
+import { z } from 'zod'
+import { idSchema, tipoAtividadeDenunciaSchema, textoLongoSchema, textoSchema } from '../../utils/commonValidator.js'
 
 export const SchemaEnviarDenuncia = z.object({
     alvoId: idSchema,
@@ -7,4 +7,3 @@ export const SchemaEnviarDenuncia = z.object({
     descricao: textoLongoSchema,
     motivo: textoSchema
 })
-    

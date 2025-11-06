@@ -1,45 +1,17 @@
 import { z } from 'zod'
-
-// ===================== ENUMS =====================
-export const categoriasEnum = z.enum([
-  'Saúde', 'Segurança', 'Transporte', 'Educação', 'Cultura',
-  'Turismo', 'Meio Ambiente', 'Urbanismo', 'Esportes',
-  'Assistência Social', 'Infraestrutura', 'Tecnologia',
-  'Economia', 'Emprego', 'Habitação',
-], {
-  errorMap: () => ({ message: 'Categoria inválida selecionada.' })
-})
-
-export const cargoEnum = z.enum(['administrador', 'gestor', 'cidadao'], {
-  errorMap: () => ({ message: 'Cargo inválido.' })
-})
-
-export const permissaoEnum = z.enum([
-  'Publicar Noticia', 'Agendar Transmissao', 'Criar Votacao', 'Moderar Conteudo'
-], {
-  errorMap: () => ({ message: 'Permissão inválida.' })
-})
-
-export const temaSistemaEnum = z.enum(['system', 'claro', 'escuro'], {
-  errorMap: () => ({ message: 'Tema inválido.' })
-})
-
-export const tipoNotificacaoEnum = z.enum([
-  'Nova votação', 'Nova notícia', 'Nova transmissão', 'Comentário em debate'
-], {
-  errorMap: () => ({ message: 'Tipo de notificação inválido.' })
-})
-
-export const preferenciaNotificacaoEnum = z.enum(['Som', 'Vibração'], {
-  errorMap: () => ({ message: 'Preferência de notificação inválida.' })
-})
-
-export const tipoAtividadeEnum = z.enum(['Debate', 'Comentario', 'Pauta', 'Denuncia', 'Gestão', 'Usuário'])
-export const tipoAtividadeDenunciaEnum = z.enum(['Debate', 'Comentario'])
-
-export const statusEnum = z.enum(['rascunho', 'publicado'])
-export const statusVotacaoEnum = z.enum(['rascunho', 'ativa', 'finalizada'])  
-export const statusDenunciaEnum = z.enum(['aberta', 'removida', 'verificada'])
+import {
+  categoriasEnum,
+  cargoEnum,
+  permissaoEnum,
+  temaSistemaEnum,
+  tipoNotificacaoEnum,
+  preferenciaNotificacaoEnum,
+  tipoAtividadeEnum,
+  tipoAtividadeDenunciaEnum,
+  statusEnum,
+  statusVotacaoEnum,
+  statusDenunciaEnum
+} from './enums.js'
 
 // ===================== ID =====================
 
@@ -159,8 +131,8 @@ export const opcoesRespostaSchema = z.array(
   z.object({
     texto: z.string().max(255, { message: 'Texto da opção muito longo (máx. 255 caracteres).' })
   })
-).min(1, { message: 'É necessário fornecer pelo menos uma opção.' })
- .max(4, { message: 'Máximo de 4 opções permitidas.' })
+).min(2, { message: 'É necessário fornecer pelo menos uma opção.' })
+  .max(4, { message: 'Máximo de 4 opções permitidas.' })
 
 // ===================== Tema =====================
 

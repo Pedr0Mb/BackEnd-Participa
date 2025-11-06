@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import {textoLongoSchema, idSchema} from '../../utils/commonValidator.js'
+import { textoLongoSchema, idSchema } from '../../utils/commonValidator.js'
 
 export const SchemaCriarComentario = z.object({
   idDebate: idSchema,
@@ -14,5 +14,5 @@ export const SchemaEditarComentario = z.object({
 })
 
 export const SchemaDeletarComentario = z.object({
-  idComentario:idSchema
+  idComentario: idSchema
 })

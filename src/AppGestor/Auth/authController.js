@@ -6,11 +6,11 @@ export async function loginCpfController(req, res, next) {
     const data = authValidator.AuthUserSchema.parse({
       cpf: req.body.cpf,
       senha: req.body.senha,
-    });
+    })
 
-    const resultado = await authService.authGestor(data);
-    return res.status(200).json(resultado);
+    const resultado = await authService.authGestor(data)
+    return res.status(200).json(resultado)
   } catch (err) {
-    next(err);
+    next(err)
   }
 }

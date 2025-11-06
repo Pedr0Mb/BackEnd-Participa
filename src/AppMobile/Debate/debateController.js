@@ -1,33 +1,32 @@
-import { id } from 'zod/locales';
 import * as debateService from './debateService.js'
 import * as debateValidator from './debateValidator.js'
 
-export async function pesquisarDebateController(req, res, next) {  
+export async function pesquisarDebateController(req, res, next) {
   try {
-    const idUsuario = req.usuario.id;
+    const idUsuario = req.usuario.id
     const data = debateValidator.SchemaPesquisarPauta.parse({
       debateProprio: toBoolean(req.query.debateProprio),
       titulo: req.query.titulo || null,
-    });
+    })
 
-    const pautas = await debateService.pesquisarDebate({...data,  idUsuario,});
-    return res.status(200).json(pautas);
-  } catch(err) {
-    next(err);
+    const pautas = await debateService.pesquisarDebate({ ...data, idUsuario, })
+    return res.status(200).json(pautas)
+  } catch (err) {
+    next(err)
   }
 }
 
 export async function visualizarDebateController(req, res, next) {
   try {
-    const { idDebate } = debateValidator.SchemaPautaId.parse({ idDebate: Number(req.params.id) });
-    const pauta = await debateService.visualizarDebate(idDebate);
-    return res.status(200).json(pauta);
+    const { idDebate } = debateValidator.SchemaPautaId.parse({ idDebate: Number(req.params.id) })
+    const pauta = await debateService.visualizarDebate(idDebate)
+    return res.status(200).json(pauta)
   } catch (err) {
-    next(err);
+    next(err)
   }
 }
 
-export async function criarDebateController(req, res, next) {  
+export async function criarDebateController(req, res, next) {
   try {
     const data = debateValidator.SchemaCriarPauta.parse({
       titulo: req.body.titulo,
@@ -35,12 +34,12 @@ export async function criarDebateController(req, res, next) {
       tema: req.body.tema,
       descricoes: req.body.descricoes,
       imagem: req.body.imagem
-    });
+    })
 
-    await debateService.criarDebate({ idAutor: req.usuario.id, ...data });
-    return res.sendStatus(201);
-  } catch(err) {
-    next(err);
+    await debateService.criarDebate({ idAutor: req.usuario.id, ...data })
+    return res.sendStatus(201)
+  } catch (err) {
+    next(err)
   }
 }
 
@@ -52,29 +51,29 @@ export async function editarDebateController(req, res, next) {
       subtitulo: req.body.subtitulo,
       tema: req.body.tema,
       descricoes: req.body.descricoes,
-      imagem: req.body.imagem 
-    });
+      imagem: req.body.imagem
+    })
 
-    await debateService.editarDebate({ idUsuario: req.usuario.id, ...data });
-    return res.sendStatus(204);
-  } catch(err) {
-    next(err);
+    await debateService.editarDebate({ idUsuario: req.usuario.id, ...data })
+    return res.sendStatus(204)
+  } catch (err) {
+    next(err)
   }
 }
 
 export async function removerDebateController(req, res, next) {
   try {
-    const idUsuario = req.usuario.id;
-    const { idDebate } = debateValidator.SchemaPautaId.parse({ idDebate: Number(req.params.id) });
-    await debateService.deletarDebate({ idUsuario, idDebate });
-    return res.sendStatus(204);
-  } catch(err) {
-    next(err);
+    const idUsuario = req.usuario.id
+    const { idDebate } = debateValidator.SchemaPautaId.parse({ idDebate: Number(req.params.id) })
+    await debateService.deletarDebate({ idUsuario, idDebate })
+    return res.sendStatus(204)
+  } catch (err) {
+    next(err)
   }
 }
 
 function toBoolean(value) {
-  if (value === 'true') return true;
-  if (value === 'false') return false;
-  return null;
+  if (value === 'true') return true
+  if (value === 'false') return false
+  return null
 }

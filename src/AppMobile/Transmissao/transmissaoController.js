@@ -3,7 +3,7 @@ import * as validacaoTransmissao from './transmissaoValidator.js'
 
 export async function pesquisarTransmissaoController(req, res, next) {
   try {
-    const { titulo } = validacaoTransmissao.SchemaPesquisarTransmissao.parse({titulo: req.query.titulo || null})
+    const { titulo } = validacaoTransmissao.SchemaPesquisarTransmissao.parse({ titulo: req.query.titulo || null })
     const resultado = await transmissaoService.pesquisarTransmissao(titulo)
 
     return res.status(200).json(resultado)

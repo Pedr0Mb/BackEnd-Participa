@@ -1,19 +1,19 @@
-import { z } from 'zod';
+import { z } from 'zod'
 import {
   idSchema,
   textoSchema,
   descricoesSchema,
   linkSchema,
   temaSchema,
-} from '../../utils/commonValidator.js';
+} from '../../utils/commonValidator.js'
 
 export const SchemaDebateId = z.object({
   idDebate: idSchema,
-});
+})
 
 export const SchemaPesquisarDebate = z.object({
   titulo: textoSchema.nullable().optional(),
-});
+})
 
 export const SchemaEditarDebate = z.object({
   idDebate: idSchema,
@@ -22,4 +22,4 @@ export const SchemaEditarDebate = z.object({
   descricoes: descricoesSchema,
   imagem: linkSchema,
   tema: temaSchema,
-});
+})

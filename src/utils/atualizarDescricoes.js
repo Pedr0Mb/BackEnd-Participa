@@ -15,7 +15,7 @@ export async function atualizarDescricoes({ descricoes = [], tipoAtividade, idIt
 
   await Promise.all(
     descricoes.map(async desc => {
-      const novoId = await getNextId('Descricao') 
+      const novoId = await getNextId('Descricao')
       return descricoesRef.doc(String(novoId)).set({
         id: novoId,
         titulo: desc.titulo || null,
